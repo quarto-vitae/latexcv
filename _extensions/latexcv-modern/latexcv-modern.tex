@@ -1,0 +1,154 @@
+$latexcv-preamble.tex()$
+
+%-------------------------------------------------------------------------------
+%	MODERN
+%
+%	A contact line in the running head, a full-bleed dark title bar beneath it,
+%	filled accent bars for the section headings, and a three-column entry
+%	headline that gives the date a column of its own at the left.
+%-------------------------------------------------------------------------------
+
+$if(geometry)$
+\geometry{$for(geometry)$$geometry$$sep$,$endfor$}
+$else$
+\geometry{top=1.25cm, bottom=1.5cm, left=1.5cm, right=1.5cm}
+$endif$
+
+% The contact line is set in the running head, so the page must actually
+% reserve room for one. The shared preamble leaves \headheight at upstream's
+% -5pt, which is only safe while the head is empty. Applied after the block
+% above, so it holds whether or not the document supplied its own `geometry`.
+\geometry{headheight=14pt, headsep=14pt}
+
+%-------------------------------------------------------------------------------
+%	HEADINGS
+%-------------------------------------------------------------------------------
+% A filled bar the width of the text block, opened by three overlapping
+% chevrons. \mystrut gives it the height of a line so the bar is not set flush
+% against the word inside it.
+\newcommand{\cvsection}[1]{%
+  \vspace{6pt}
+  \colorbox{sectcol}{\mystrut\makebox[\linewidth][l]{%
+    \cvchevrons{bgcol}\hspace{4pt}%
+    \textcolor{white}{\textbf{#1}}\hspace{4pt}}}\\
+  \vspace{2pt}}
+
+% Upstream has no second heading level. An unfilled echo of the bar keeps the
+% two distinguishable without introducing a third colour.
+\newcommand{\cvsubsection}[1]{%
+  \vspace{4pt}
+  {\larrow{sectcol}\hspace{2pt}\textcolor{bgcol}{\textbf{#1}}}\par
+  \vspace{2pt}}
+
+\newcommand{\metasection}[2]{%
+  \footnotesize{\textbf{#1}} \footnotesize{#2}\\[1pt]}
+
+%-------------------------------------------------------------------------------
+%	ENTRIES
+%-------------------------------------------------------------------------------
+% Date at the left, what in the middle, with at the right. `where` joins `what`
+% rather than taking a fourth column, which at this measure would leave all
+% four too narrow to set.
+\newcommand{\cventryhead}[4]{%
+  \begin{tabular*}{\linewidth}{@{}p{\cvwhenwidth}@{}p{\dimexpr\linewidth-\cvwhenwidth-\cvwithwidth-2\tabcolsep\relax}@{\extracolsep{\fill}}x{\cvwithwidth}@{}}
+    \textcolor{bgcol}{#1} & \textbf{#2}%
+    \ifthenelse{\isempty{#4}}{}{, \textit{\textcolor{bgcol}{#4}}}%
+    & \vspace{2.5pt}\textcolor{sectcol}{#3}
+  \end{tabular*}}
+
+\newcommand{\vitaeentry}[5]{%
+  \vspace{8pt}
+  \cventryhead{#1}{#2}{#3}{#4}
+  \vspace{-12pt}
+  \textcolor{softcol}{\hrule}
+  \vspace{6pt}
+  #5}
+
+\newcommand{\vitaebrief}[4]{%
+  \vspace{4pt}
+  \cventryhead{#1}{#2}{#3}{#4}}
+
+% The measurement and the row itself are in the shared preamble: every design
+% sets this listing the same way, and only the floor below differs.
+\newcommand{\vitaeskill}[2]{\cvskillrow{#1}{#2}}
+
+% Marked with the same chevron as the headings, and indented to the date
+% column so the elaboration lines up under the entry rather than under its
+% date.
+\newenvironment{vitaewhy}{%
+  \begin{itemize}[label=\larrow{bgcol}, topsep=0pt, partopsep=0pt, itemsep=3pt,
+                  parsep=0pt, leftmargin=\dimexpr\cvwhenwidth+1.2em\relax,
+                  labelsep=0.4em]%
+}{%
+  \end{itemize}%
+}
+
+%-------------------------------------------------------------------------------
+%	RUNNING HEAD
+%-------------------------------------------------------------------------------
+% Upstream sets name, position and contacts as one small centred line in the
+% page head, above the title bar rather than below it, and repeats it on every
+% page. The name appears twice on the first page as a result, which is the
+% point: the head is what carries the CV's identity onto the later ones.
+%
+% \cvfirstcontactfalse rather than \cvcontactsreset: the name and position have
+% already been emitted, so the first contact wants a separator in front of it
+% like every other. Setting the flag this way round also means a document with
+% no contact fields at all emits nothing here rather than a dangling separator.
+% It matters that this is set on every page -- the head is re-executed per page,
+% and \cvcontacts otherwise remembers that it has already run.
+% `$$` is how a Pandoc template writes a literal dollar, so the separator reaches
+% LaTeX as the math-mode \cdot upstream uses rather than opening a template
+% variable named \cdot.
+\renewcommand{\cvcontactsep}{\hspace{5pt}\textcolor{softcol}{$$\cdot$$}\hspace{5pt}}
+\chead{\small
+  \textsc{$name$$if(surname)$ $surname$$endif$}%
+  $if(position)$\cvcontactsep \textsc{$position$}$endif$%
+  \cvfirstcontactfalse\cvcontacts}
+
+\begin{document}
+
+%-------------------------------------------------------------------------------
+%	TITLE
+%-------------------------------------------------------------------------------
+% Upstream bleeds the bar past both margins by setting it 1.5 times the text
+% width and pulling it a quarter of that to the left.
+\vspace{-20.55pt}
+\hspace{-0.25\linewidth}\colorbox{bgcol}{\makebox[1.5\linewidth][c]{%
+  \HUGE{\textcolor{white}{\textsc{$name$$if(surname)$ $surname$$endif$}}%
+  $if(docname)$\cvtitlerule\textcolor{white}{\textsc{$docname$}}$endif$}}}
+
+%-------------------------------------------------------------------------------
+%	PROFILE PICTURE (optional)
+%-------------------------------------------------------------------------------
+$if(profilepic)$
+% Upstream sets the photograph in a `figure[H]', which pads it by \intextsep
+% above and below. That padding is written out here rather than floated for, so
+% the picture keeps its distance from the title bar above it and from the first
+% section band below -- both of which are full-width rules of colour that the
+% picture runs into as soon as the space between them is left to the defaults.
+%
+% Only the space above is set. \parskip and the interline glue are suppressed
+% there so that the 12pt is the whole of it rather than a floor under it -- the
+% picture is tall enough that TeX would otherwise add \lineskip on top, and
+% \parskip again on the paragraph it opens. Below the picture the same glue is
+% left alone, and comes to the same 12pt on its own.
+{\parskip=0pt\relax
+ \par\vspace{12pt}\nointerlineskip
+ \noindent\makebox[\linewidth][r]{%
+   \includegraphics[width=$if(profilepic-width)$$profilepic-width$$else$0.18\linewidth$endif$]{$profilepic$}}\par}
+$else$
+\vspace{8pt}
+$endif$
+
+\normalsize
+
+$latexcv-body.tex()$
+
+$if(footer)$
+\vspace{12pt}
+\hspace{-0.25\linewidth}\colorbox{bgcol}{\makebox[1.5\linewidth][c]{%
+  \mystrut\footnotesize\textcolor{white}{$footer$}}}
+$endif$
+
+\end{document}

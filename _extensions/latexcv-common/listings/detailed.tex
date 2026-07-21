@@ -1,0 +1,21 @@
+$-- A full entry: the headline (when/what/with/where), then a bulleted
+$-- elaboration from `why`. Written against \vitaeentry rather than any one
+$-- style's own macros, so the same listing serves every latexcv style.
+$--
+$-- The `when` and `with` columns are measured across the whole listing before
+$-- any entry is set, so that they line up down it and are never wider than
+$-- their content needs. See MEASURED COLUMNS in latexcv-preamble.tex.
+\begin{vitaeentries}%
+$for(entries)$\cvmeasurewhen{$entries.when$}\cvmeasurewith{$entries.with$}$endfor$\cventriesready%
+$for(entries)$
+\vitaeentry
+  {$entries.when$}  % when
+  {$entries.what$}  % what
+  {$entries.with$}  % with
+  {$entries.where$} % where
+  {$if(entries.why)$\begin{vitaewhy}
+$for(entries.why)$    \item $entries.why$
+$endfor$  \end{vitaewhy}$endif$}
+
+$endfor$
+\end{vitaeentries}

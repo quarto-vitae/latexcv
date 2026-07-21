@@ -1,0 +1,114 @@
+---
+name: Marie
+surname: Curie
+position: "Physicist and Chemist"
+address: "Paris, France"
+email: "marie.curie@example.org"
+github: mcurie
+# Every design places a profile picture; a square image crops best. Each sets
+# its own width, and `profilepic-width` overrides it.
+# profilepic: "profile.jpg"
+# Uncomment to add more to the header:
+# phone: "+33 1 23 45 67 89"
+# www: "example.org"
+# orcid: 0000-0000-0000-0000
+# linkedin: mcurie
+# profilepic-width: "0.25\\linewidth"
+# footer: "A trailing line, set in the accent colour."
+# The accent colour every design builds its headings from. `headcolor` is
+# accepted as an alias, so the same front matter drives the other quarto-vitae
+# templates.
+# sectcol: "0096FF"
+# Each design is its own extension, so switching is a one-line change:
+#   latexcv-classic-pdf       latexcv-rows-pdf
+#   latexcv-modern-pdf        latexcv-sidebar-pdf
+#   latexcv-minimalistic-pdf  latexcv-sidebarleft-pdf
+#   latexcv-twocolumn-pdf
+format: latexcv-classic-pdf
+# The sidebar designs fill their column from here. Every other design ignores
+# it, so it can stay in the document as you switch between them.
+sidebar:
+  - title: Techniques
+    items:
+      - Fractional crystallisation
+      - Quartz electrometry
+      - Radiometric measurement
+  - title: Fields
+    items:
+      # `stars` and `bar` work here as they do in the body, and are
+      # interchangeable. This column sets a rating on the line below what it
+      # rates, so no break is written for either.
+      - "Radioactivity {{< stars 5 >}}"
+      - "Spectroscopy {{< bar 60% >}}"
+  - title: Languages
+    items:
+      - Polish, French, Russian
+---
+
+# Education
+
+Each row is one entry, each column a field. `fields` renames a column the style
+does not expect, like `dplyr::rename()`.
+
+::: {.entries style="detailed" fields="{what: Degree, with: Institution, when: Years, where: Location}"}
+| Degree             | Institution         | Years     | Location      |
+|--------------------|---------------------|-----------|---------------|
+| Ph.D. in Physics   | University of Paris | 1891-1895 | Paris, France |
+| M.Sc. in Chemistry | University of Paris | 1889-1891 | Paris, France |
+:::
+
+# Employment
+
+A grid table can hold a bullet list in a cell, so `why` carries several points
+per entry. Here the headings already match, and no `fields` is needed.
+
+::: {.entries style="detailed"}
++------------+---------------------+-----------+------------------------------+
+| what       | with                | when      | why                          |
++============+=====================+===========+==============================+
+| Professor  | University of Paris | 1906-1934 | - First woman to hold the    |
+|            |                     |           |   chair of General Physics   |
+|            |                     |           | - Directed the Curie         |
+|            |                     |           |   Laboratory                 |
++------------+---------------------+-----------+------------------------------+
+| Researcher | EPCI                | 1897-1906 | - Isolated polonium and      |
+|            |                     |           |   radium                     |
++------------+---------------------+-----------+------------------------------+
+:::
+
+# Awards
+
+The `brief` style is a single line per entry, for lists needing no elaboration.
+
+::: {.entries style="brief"}
+| what                     | where           | when |
+|--------------------------|-----------------|------|
+| Nobel Prize in Chemistry | Swedish Academy | 1911 |
+| Davy Medal               | Royal Society   | 1903 |
+| Nobel Prize in Physics   | Swedish Academy | 1903 |
+:::
+
+# Service
+
+Markdown inside cells is preserved and LaTeX special characters are escaped, so
+*emphasis* and a literal 100% both come out right.
+
+::: {.entries style="brief"}
+| what                                 | where    | when |
+|--------------------------------------|----------|------|
+| Member, *Solvay Council*             | Brussels | 1911 |
+| Director, Red Cross Radiology (100%) | Paris    | 1914 |
+:::
+
+# Skills
+
+The `skills` style pairs a category with its members. A rating is content, not a
+field: `{{{< stars 4 >}}}` and `{{{< bar 80% >}}}` work in any cell.
+
+::: {.entries style="skills"}
+| what            | with                                             |
+|-----------------|--------------------------------------------------|
+| Radiochemistry  | {{< bar 100% >}}                                 |
+| Electrometry    | {{< stars 8/10 >}} piezoelectric quartz          |
+| Languages       | Polish, French, Russian                          |
+:::

@@ -1,0 +1,224 @@
+$latexcv-preamble.tex()$
+
+%-------------------------------------------------------------------------------
+%	TWO COLUMN
+%
+%	The body set in two balanced columns with compact stacked entry headlines to
+%	suit the narrower measure. The name is a filled bar opening the left column,
+%	the contact line runs across the head of the page, and a second filled bar
+%	closes the foot.
+%
+%	Upstream builds its two columns by hand, as a run of paired 0.485\textwidth
+%	minipages with each section placed into one of them. That only balances for
+%	the content upstream happens to ship, and a Markdown body is a single
+%	stream with nowhere to say which column a section belongs in. `multicol` is
+%	used here instead, so the columns balance themselves and the content may
+%	run to any length.
+%-------------------------------------------------------------------------------
+
+% The bottom margin is only as deep as the footer bar plus a little air above
+% it: the bar bleeds off the foot of the paper, so what lies below the body is
+% the bar itself and not a margin. Upstream gets the same effect with
+% `bottom=-.6cm`, running the text block past the paper edge, because its bar is
+% the last thing in the document rather than the page foot.
+$if(geometry)$
+\geometry{$for(geometry)$$geometry$$sep$,$endfor$}
+$else$
+\geometry{top=1.5cm, bottom=24pt, left=1.25cm, right=1.25cm}
+$endif$
+
+% The contact line is set in the running head, so the page must actually
+% reserve room for one. The shared preamble leaves \headheight at upstream's
+% -5pt, which is only safe while the head is empty. Applied after the block
+% above, so it holds whether or not the document supplied its own `geometry`.
+\geometry{headheight=14pt, headsep=14pt}
+
+% The distance from the text edge to the paper edge, for the elements that bleed
+% out of the left column: the title bar, the photograph under it, and the footer.
+% Measured at \begin{document}, once the geometry above has settled.
+\newlength{\cvbleed}
+\newlength{\cvbleedwidth}
+\AtBeginDocument{\setlength{\cvbleed}{\dimexpr 1in+\oddsidemargin\relax}}
+
+% The same measurement downwards: from the baseline fancyhdr sets the foot on to
+% the bottom edge of the paper. \cvfooterbar lowers the bar by this, less the
+% bar's own depth, so the bar ends on the paper edge whatever the page geometry
+% turns out to be -- including a document that supplied its own.
+\newlength{\cvfootbleed}
+\AtBeginDocument{\setlength{\cvfootbleed}{%
+  \dimexpr\paperheight-1in-\topmargin-\headheight-\headsep-\textheight-\footskip\relax}}
+
+\setlength{\columnsep}{$if(columnsep)$$columnsep$$else$18pt$endif$}
+
+% Space between an entry and the next, named because it is used in three
+% places here.
+\newcommand{\spread}{4pt}
+
+%-------------------------------------------------------------------------------
+%	HEADINGS
+%-------------------------------------------------------------------------------
+% \linewidth rather than \textwidth, so the bar fills the column it is set in
+% rather than overrunning into the next.
+\newcommand{\cvsection}[1]{%
+  \vspace{4pt}
+  \colorbox{bgcol}{\mystrut\makebox[\linewidth][l]{%
+    \cvchevrons{sectcol}\hspace{4pt}%
+    \textcolor{white}{\textbf{#1}}\hspace{4pt}}}\\
+  \vspace{2pt}}
+
+\newcommand{\cvsubsection}[1]{%
+  \vspace{2pt}
+  {\larrow{sectcol}\hspace{2pt}\textcolor{bgcol}{\textbf{#1}}}\par
+  \vspace{2pt}}
+
+%-------------------------------------------------------------------------------
+%	ENTRIES
+%-------------------------------------------------------------------------------
+% Stacked rather than in columns: at half the page width there is no room for
+% a date column beside the text. The date and context share the accent-coloured
+% first line, with the title in bold beneath.
+\newcommand{\cventryhead}[4]{%
+  \textcolor{sectcol}{%
+    \ifthenelse{\isempty{#1}}{}{#1}%
+    \ifthenelse{\isempty{#3}}{}{\ifthenelse{\isempty{#1}}{}{ - }#3}%
+    \ifthenelse{\isempty{#4}}{}{, \textit{#4}}}\\
+  \textbf{#2}}
+
+\newcommand{\vitaeentry}[5]{%
+  \begin{flushleft}
+    \cventryhead{#1}{#2}{#3}{#4}\\[-7pt]
+    \textcolor{softcol}{\hrule}
+    \vspace{\spread}
+    #5
+  \end{flushleft}
+  \vspace{-\spread}}
+
+\newcommand{\vitaebrief}[4]{%
+  \begin{flushleft}
+    \cventryhead{#1}{#2}{#3}{#4}
+  \end{flushleft}
+  \vspace{-\spread}}
+
+% The measurement and the row itself are in the shared preamble: every design
+% sets this listing the same way, and only the floor below differs.
+\newcommand{\vitaeskill}[2]{\cvskillrow{#1}{#2}}
+
+\newenvironment{vitaewhy}{%
+  \begin{itemize}[label=\larrow{bgcol}, topsep=0pt, partopsep=0pt, itemsep=2pt,
+                  parsep=0pt, leftmargin=1.4em, labelsep=0.3em]%
+}{%
+  \end{itemize}%
+}
+
+%-------------------------------------------------------------------------------
+%	RUNNING HEAD
+%-------------------------------------------------------------------------------
+% Upstream sets name, position and contacts as one small centred line above the
+% columns. That is what frees the title block to sit inside the left column, so
+% the two go together.
+%
+% \cvfirstcontactfalse rather than \cvcontactsreset: the name and position have
+% already been emitted, so the first contact wants a separator in front of it
+% like every other. Setting the flag this way round also means a document with
+% no contact fields at all emits nothing here rather than a dangling separator.
+% It matters that this is set on every page -- the head is re-executed per page,
+% and \cvcontacts otherwise remembers that it has already run.
+% `$$` is how a Pandoc template writes a literal dollar, so the separator reaches
+% LaTeX as the math-mode \cdot upstream uses rather than opening a template
+% variable named \cdot.
+\renewcommand{\cvcontactsep}{\hspace{5pt}\textcolor{softcol}{$$\cdot$$}\hspace{5pt}}
+\chead{\small
+  \textsc{$name$$if(surname)$ $surname$$endif$}%
+  $if(position)$\cvcontactsep $position$$endif$%
+  \cvfirstcontactfalse\cvcontacts}
+
+%-------------------------------------------------------------------------------
+%	FOOTER
+%-------------------------------------------------------------------------------
+% A filled bar across the foot of the page, running the full width of the paper.
+%
+% Upstream fakes one at the very end of its document with \vspace*{\fill}, which
+% can only ever reach the last page; set as the page foot here, so a CV of more
+% than one page keeps it.
+%
+% The bar spans the paper rather than the text block, which takes some care.
+% fancyhdr centres the foot with \hfil, and \hfil stretches but does not shrink,
+% so simply handing it an overwide box does not centre that box -- the glue sits
+% at its natural zero and the box hangs off the right edge alone. The outer
+% \makebox is therefore exactly \textwidth, which is the width fancyhdr expects
+% and centres properly; the bleed is then applied inside it, where it is
+% measured from the left text edge and so reaches the paper edge exactly.
+%
+% Vertically the bar is lowered onto the bottom edge of the paper, so no white
+% shows beneath it. The bar is boxed first because the shift depends on its own
+% depth; the \raisebox is given that box's original height and depth so the
+% shift moves the bar without also moving the foot it is set in.
+\newsavebox{\cvfootbox}
+\newcommand{\cvfooterbar}[1]{%
+  \sbox\cvfootbox{%
+    \colorbox{bgcol}{\makebox[\dimexpr\paperwidth-2\fboxsep\relax][c]{%
+      \mystrut\footnotesize\textcolor{white}{#1}}}}%
+  \makebox[\textwidth][l]{%
+    \hspace*{-\cvbleed}%
+    \raisebox{-\dimexpr\cvfootbleed-\dp\cvfootbox\relax}%
+      [\ht\cvfootbox][\dp\cvfootbox]{\usebox\cvfootbox}}}
+
+% `footer` fills the bar when it is given. Failing that it carries the web and
+% code addresses, which is what upstream puts there -- so the bar is present on
+% a document that never asked for one, as it is in the design.
+$if(footer)$
+\cfoot{\cvfooterbar{$footer$}}
+$else$
+$if(www)$
+\cfoot{\cvfooterbar{\href{https://$www$}{$www$}%
+  $if(github)$\cvcontactsep\href{https://github.com/$github$}{github.com/$github$}$endif$}}
+$else$
+$if(github)$
+\cfoot{\cvfooterbar{\href{https://github.com/$github$}{github.com/$github$}}}
+$endif$
+$endif$
+$endif$
+
+\begin{document}
+
+\begin{multicols}{2}
+
+%-------------------------------------------------------------------------------
+%	TITLE
+%-------------------------------------------------------------------------------
+% Set as the first material *inside* the columns, so that it opens the left one
+% and the body flows on beneath it. Upstream places it in a hand-built left
+% minipage, which a single Markdown stream has no way to address; being first in
+% the multicol stream puts it in the same place without needing to.
+%
+% The bar and the photograph under it are drawn \cvbleed wider than the column
+% and pulled that far left, so they run off the page edge as upstream's do.
+% \fboxsep is subtracted rather than zeroed, so the padding keeping the name off
+% the edge of its box survives and the bar still ends flush with the column.
+%
+% The accent rule falls between the given and family names, which is what
+% \cvtitlerule is for and where upstream puts it -- not beside `docname`, which
+% this design has no room for and upstream does not set.
+\noindent\hspace*{-\cvbleed}%
+\colorbox{bgcol}{\makebox[\dimexpr\linewidth+\cvbleed-2\fboxsep\relax][c]{%
+  \HUGE\textcolor{white}{\textsc{$name$}}%
+  $if(surname)$\cvtitlerule\textcolor{white}{\textsc{$surname$}}$endif$}}%
+$if(profilepic)$
+% The photograph sits flush under the bar, with nothing between the two boxes:
+% \nointerlineskip drops the interline glue, and \parskip is zeroed for the
+% paragraph the picture opens, since the picture is a continuation of the bar
+% rather than a paragraph after it.
+\par\nointerlineskip
+\setlength{\cvbleedwidth}{\dimexpr\linewidth+\cvbleed\relax}%
+{\parskip=0pt\relax
+ \noindent\hspace*{-\cvbleed}\includegraphics[width=\cvbleedwidth]{$profilepic$}\par}%
+$endif$
+\par\vspace{8pt}
+
+\normalsize
+
+$latexcv-body.tex()$
+
+\end{multicols}
+
+\end{document}

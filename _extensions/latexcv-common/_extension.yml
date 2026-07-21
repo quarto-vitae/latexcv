@@ -1,0 +1,39 @@
+title: latexcv common
+author: Mitchell O'Hara-Wild
+version: 0.1.0
+quarto-required: ">=1.7.0"
+
+# What the seven latexcv designs hold in common, in one place.
+#
+# The designs are packaged as seven independent extensions, because upstream
+# ships them as independent documents. Most of what they are made of, though, is
+# the same in all seven: the preamble and the Pandoc scaffold, the heading
+# filter, the three listings, and the embedded copy of the vitae filter that
+# renders an entries table. Kept in each design, that is seven copies to edit in
+# step, and the copies drift.
+#
+# So they are kept here, and each design reaches them by relative path --
+# `../latexcv-common/latexcv-preamble.tex` and so on. Quarto resolves such a
+# path against the extension that names it, so one copy serves all seven, and
+# the designs stay independent in what actually differs between them: the
+# template, the entry macros, and any listing a design sets its own way.
+#
+# This is not a format and cannot be rendered to. Nothing names it in a
+# `format:` line; it is installed alongside the designs and drawn from.
+#
+# A design still overrides anything it needs to. `rows` keeps its own
+# latexcv.lua, which gathers the sections into bands, and `sidebarleft` its own
+# listings/skills.tex, which draws rating bars where the others set text. Both
+# name the local file and leave the rest pointing here.
+contributes:
+  # `{{< stars 8/10 >}}` and `{{< bar 80% >}}`, for rating a skill from within
+  # the content.
+  #
+  # Contributed here rather than by each design, so they are registered once
+  # however many designs are installed, and belong to none of them. That is the
+  # honest arrangement: a rating is written in the document, and the document
+  # keeps it as it switches designs -- including the bars, which are
+  # `sidebarleft`'s default but not its property.
+  shortcodes:
+    - stars.lua
+    - bar.lua

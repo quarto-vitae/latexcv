@@ -1,0 +1,34 @@
+%-------------------------------------------------------------------------------
+%	DOCUMENT BODY
+%
+%	The Pandoc scaffold every design shares: line spacing, the include-before
+%	and include-after hooks, the body itself, and the bibliography.
+%
+%	This is the only part of a design's template that carried no design in it,
+%	and it was repeated verbatim in each. Kept here so that a change to how
+%	Quarto wants a bibliography emitted is made once rather than seven times.
+%
+%	It is called between \begin{document} and \end{document}, from wherever the
+%	design wants the content: inside a paracol column for the sidebar designs,
+%	inside multicols for `twocolumn`, and at the top level for the rest.
+%-------------------------------------------------------------------------------
+$if(linestretch)$
+\setstretch{$linestretch$}
+$endif$
+
+$for(include-before)$
+$include-before$
+$endfor$
+
+$body$
+
+$before-bib.tex()$
+
+$if(nocite-ids)$
+\nocite{$for(nocite-ids)$$it$$sep$, $endfor$}
+$endif$
+$biblio.tex()$
+
+$for(include-after)$
+$include-after$
+$endfor$

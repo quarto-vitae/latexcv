@@ -1,0 +1,16 @@
+$-- A category paired with its members. The members are given either as one
+$-- string in `with` or as a list in `why`; a list is joined with commas, since
+$-- the styles set a skills line as running text rather than as bullets.
+$--
+$-- Every category is measured before any row is set, so that the listing shares
+$-- one column width taken from the widest of them. Sizing each row from its own
+$-- category would fit them all just as well, but lose the alignment down the
+$-- listing. See MEASURED COLUMNS in latexcv-preamble.tex.
+\begin{vitaeskills}%
+$for(entries)$\cvmeasureskill{$entries.what$}$endfor$\cvskillsready%
+$for(entries)$
+\vitaeskill
+  {$entries.what$} % what
+  {$if(entries.with)$$entries.with$$else$$for(entries.why)$$entries.why$$sep$, $endfor$$endif$} % with, or why
+$endfor$
+\end{vitaeskills}

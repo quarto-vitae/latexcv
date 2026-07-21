@@ -1,0 +1,172 @@
+$latexcv-preamble.tex()$
+
+%-------------------------------------------------------------------------------
+%	CLASSIC
+%
+%	A centred title with a rule between the name and the document type, contact
+%	details paired off beneath it, and centred section headings over full-width
+%	entries. The plainest of the styles: no colour blocks, no sidebar.
+%-------------------------------------------------------------------------------
+
+% Upstream sets a negative bottom margin to pull its single page together. That
+% is a one-page trick and misbehaves as soon as the CV runs on, so an ordinary
+% bottom margin is used here.
+$if(geometry)$
+\geometry{$for(geometry)$$geometry$$sep$,$endfor$}
+$else$
+\geometry{top=1.25cm, bottom=1.5cm, left=1.5cm, right=1.5cm}
+$endif$
+
+%-------------------------------------------------------------------------------
+%	HEADINGS
+%-------------------------------------------------------------------------------
+\newcommand{\cvsection}[1]{%
+  \vspace{4pt}
+  \begin{center}
+    \large\textcolor{sectcol}{\textbf{#1}}
+  \end{center}
+  \vspace{-2pt}}
+
+\newcommand{\cvsubsection}[1]{%
+  \vspace{2pt}
+  {\normalsize\textcolor{bgcol}{\textbf{#1}}}\par
+  \vspace{2pt}}
+
+% Upstream pairs off single lines of metadata under the title: a value on the
+% left, a labelled value on the right. Kept for documents that want it in
+% hand-written LaTeX.
+\newcommand{\metasection}[2]{%
+  \footnotesize{#2} \hspace*{\fill} \footnotesize{#1}\\[1pt]}
+
+%-------------------------------------------------------------------------------
+%	ENTRIES
+%-------------------------------------------------------------------------------
+% The headline shared by \vitaeentry and \vitaebrief: what/with/where set flush
+% left, the date flush right in the accent colour. tabular* with a computed
+% first column keeps the date hard against the right margin whatever the page
+% geometry is, rather than at upstream's fixed 13.6cm.
+\newcommand{\cventryhead}[4]{%
+  \begin{tabular*}{\linewidth}{@{}p{\dimexpr\linewidth-\cvwhenwidth-2\tabcolsep\relax}@{\extracolsep{\fill}}x{\cvwhenwidth}@{}}
+    \textbf{#2}%
+    \ifthenelse{\isempty{#3}}{}{ - \textcolor{bgcol}{#3}}%
+    \ifthenelse{\isempty{#4}}{}{, \textit{\textcolor{bgcol}{#4}}}%
+    & \vspace{2.5pt}\textcolor{sectcol}{#1}
+  \end{tabular*}}
+
+\newcommand{\vitaeentry}[5]{%
+  \cventryhead{#1}{#2}{#3}{#4}
+  \vspace{-8pt}
+  \textcolor{softcol}{\hrule}
+  \vspace{6pt}
+  #5
+  \vspace{3pt}}
+
+% No rule and no elaboration: a brief entry is one line, and a hairline under
+% every line would read as a table.
+\newcommand{\vitaebrief}[4]{%
+  \cventryhead{#1}{#2}{#3}{#4}
+  \vspace{2pt}}
+
+% The measurement and the row itself are in the shared preamble: every design
+% sets this listing the same way, and only the floor below differs.
+\newcommand{\vitaeskill}[2]{\cvskillrow{#1}{#2}}
+
+% Upstream marks its elaboration with a centred dot. The list form is used here
+% so that a long point wraps with a hanging indent instead of back to the
+% margin. \textperiodcentered rather than upstream's math-mode \cdot, since a
+% literal dollar sign would have to be escaped from the Pandoc template too.
+\newenvironment{vitaewhy}{%
+  \begin{itemize}[label=\textperiodcentered, topsep=0pt, partopsep=0pt, itemsep=2pt,
+                  parsep=0pt, leftmargin=1.2em, labelsep=0.5em]%
+}{%
+  \end{itemize}%
+}
+
+%-------------------------------------------------------------------------------
+%	PROFILE PICTURE (optional)
+%-------------------------------------------------------------------------------
+% How wide the picture is set, needed as a length rather than as the template
+% variable itself because the contact column beside it is the remainder of the
+% measure and has to be computed from it.
+\newlength{\cvpicwidth}
+\newlength{\cvpicgap}
+\setlength{\cvpicgap}{1.5em}
+
+\begin{document}
+
+$if(profilepic)$
+\setlength{\cvpicwidth}{$if(profilepic-width)$$profilepic-width$$else$0.22\linewidth$endif$}
+$endif$
+
+%-------------------------------------------------------------------------------
+%	TITLE
+%-------------------------------------------------------------------------------
+\vspace{-8pt}
+\begin{center}
+  \HUGE \textsc{$name$$if(surname)$ $surname$$endif$}%
+  $if(docname)$\cvtitlerule\textsc{$docname$}$endif$\\[2pt]
+  $if(position)$\small $position$$endif$
+\end{center}
+
+\vspace{6pt}
+
+%-------------------------------------------------------------------------------
+%	CONTACT DETAILS
+%-------------------------------------------------------------------------------
+$if(profilepic)$
+% With a picture the head of the document reflows into two columns under the
+% title: the photo on the left, the contacts stacked against the right margin
+% beside it, one to a line. Centring the contacts under a picture that is itself
+% off to one side would leave the header visibly lopsided, so the two are set as
+% a pair that balances across the measure.
+%
+% Vertically centred on each other, so a document with three contacts and one
+% with ten both sit level with the photo rather than hanging from its top edge.
+\noindent
+\begin{minipage}[c]{\cvpicwidth}
+  \includegraphics[width=\cvpicwidth]{$profilepic$}
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{\dimexpr\linewidth-\cvpicwidth-\cvpicgap\relax}
+  \raggedleft
+  \footnotesize
+  \renewcommand{\cvcontactsep}{\\}
+  \cvcontacts
+\end{minipage}
+
+\vspace{6pt}
+$else$
+% Centred and wrapped rather than upstream's two hard columns, so that a
+% document supplying three contacts and one supplying ten both come out
+% balanced.
+\begin{center}
+  \footnotesize
+  \renewcommand{\cvcontactsep}{\hspace{10pt}\textcolor{softcol}{|}\hspace{10pt}}
+  \cvcontacts
+\end{center}
+$endif$
+
+\vspace{-2pt}
+\textcolor{softcol}{\hrule}
+\vspace{6pt}
+
+\normalsize
+
+$latexcv-body.tex()$
+
+%-------------------------------------------------------------------------------
+%	FOOTER
+%-------------------------------------------------------------------------------
+% Upstream pins a footer to the bottom of its single page with \vfill. That
+% would force a page break on a CV that already fills the page, so this is set
+% as an ordinary trailing line and only when asked for.
+$if(footer)$
+\vspace{12pt}
+\textcolor{softcol}{\hrule}
+\vspace{4pt}
+\begin{center}
+  \footnotesize\textcolor{sectcol}{$footer$}
+\end{center}
+$endif$
+
+\end{document}

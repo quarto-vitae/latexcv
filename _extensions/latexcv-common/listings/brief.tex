@@ -1,0 +1,17 @@
+$-- One line per entry, with no elaboration: the same headline `detailed` uses,
+$-- without the rule and bullets under it. `why` is deliberately ignored -- a
+$-- listing that needs it wants the `detailed` style.
+$--
+$-- The `when` and `with` columns are measured across the whole listing before
+$-- any entry is set, so that they line up down it and are never wider than
+$-- their content needs. See MEASURED COLUMNS in latexcv-preamble.tex.
+\begin{vitaeentries}%
+$for(entries)$\cvmeasurewhen{$entries.when$}\cvmeasurewith{$entries.with$}$endfor$\cventriesready%
+$for(entries)$
+\vitaebrief
+  {$entries.when$}  % when
+  {$entries.what$}  % what
+  {$entries.with$}  % with
+  {$entries.where$} % where
+$endfor$
+\end{vitaeentries}

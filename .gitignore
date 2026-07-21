@@ -1,0 +1,10 @@
+/.quarto/
+*_files/
+
+# Rendered output of template.qmd. Every design writes to the same name, since
+# the design is chosen by the extension rather than by a format modifier.
+# Delete these lines if you would like to commit a rendered preview.
+/template.pdf
+/template.tex
+
+/.luarc.json

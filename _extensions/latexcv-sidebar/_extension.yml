@@ -1,0 +1,98 @@
+title: latexcv sidebar
+author: Mitchell O'Hara-Wild
+version: 0.1.0
+quarto-required: ">=1.7.0"
+
+# A tinted column of contacts and skills down the right, beside the main
+# content.
+#
+# One of the seven latexcv designs, each packaged as its own extension because
+# upstream ships them as independent documents rather than as options on a
+# shared class. That independence is the point: this design defines its entry
+# macros with whatever arity suits it, and supplies the listings that call them.
+#
+# The design is selected by the extension id, so the format is written
+# `latexcv-sidebar-pdf`. Quarto splits a format string at its last hyphen and
+# reads the head as the extension id, which resolves here to `latexcv-sidebar`
+# and `pdf`. Nothing is appended to the output name.
+contributes:
+  # `{{< stars 8/10 >}}` and `{{< bar 80% >}}`, for rating a skill from within
+  # the content, are contributed once by latexcv-common rather than declared
+  # here. They are installed alongside this design and belong to none of the
+  # seven, so a document keeps its ratings as it switches between them --
+  # including the bars, which are `sidebarleft`'s default but not its property.
+  formats:
+    pdf:
+      # Every design is a pdflatex document: inputenc, fontenc and the pdftex
+      # font packages (raleway, moresize) rather than fontspec.
+      pdf-engine: pdflatex
+      template: latexcv-sidebar.tex
+      # latexcv-preamble.tex (class options, palette, font stack, contact
+      # details, Pandoc's preamble) and latexcv-body.tex (the Pandoc scaffold)
+      # say the same thing in all seven designs, so both are held once by
+      # latexcv-common and reached from here by relative path. A `../` in any
+      # of the paths on this page is resolved against this extension's own
+      # directory, which is what lets the one copy serve all seven.
+      template-partials:
+        - ../latexcv-common/latexcv-preamble.tex
+        - ../latexcv-common/latexcv-body.tex
+        - latexcv-sidebar-common.tex
+      documentclass: article
+      papersize: a4
+      fontsize: 10pt
+      # Upstream marks links by icon and position rather than colour. Quarto's
+      # pdf format would otherwise default this to true and print the header
+      # contacts blue.
+      colorlinks: false
+      docname: Resume
+      # knitr printing data directly as a markdown table, which is what lets a
+      # code cell carry entries.
+      df-print: kable
+      # A CV is a document of listings; echoing the code that builds them is
+      # almost never wanted.
+      echo: false
+      filters:
+        # The embedded copy of quarto-vitae/curriculum, held once by
+        # latexcv-common under its _extensions/quarto-vitae/curriculum.
+        # Refresh with:
+        #   quarto update quarto-vitae/curriculum --embed latexcv-common
+        #
+        # Named by path rather than as the bare extension id `curriculum`,
+        # because it has to be placed in the pipeline rather than left where a
+        # filter goes by default. The filter renders each entries table into
+        # raw LaTeX, and a shortcode written in one of its cells -- `{{< stars
+        # 8/10 >}}` -- is still unexpanded at the point a filter runs by
+        # default, so it would be written away and lost. `post-quarto` puts
+        # this after shortcode expansion, so a cell arrives here as the content
+        # it stands for. The id form takes no `at:`, hence the path.
+        - at: post-quarto
+          path: ../latexcv-common/_extensions/quarto-vitae/curriculum/vitae-entries.lua
+        # Maps `#` and `##` onto \cvsection and \cvsubsection. The mapping is
+        # the same wherever the headings are drawn, so it is shared.
+        - at: post-quarto
+          path: ../latexcv-common/latexcv.lua
+      vitae:
+        # The styles this design implements, for the filter's fallback warning.
+        styles: [detailed, brief, skills]
+        # Each style is pointed at its listing explicitly.
+        #
+        # This is what keeps seven co-installed designs from colliding. The
+        # filter's automatic lookup scans every `_extensions/**/entries`
+        # directory and takes the first match by directory order, with no
+        # knowledge of which format is rendering -- so seven extensions each
+        # shipping `entries/detailed.tex` would render whichever the filesystem
+        # listed first. Naming the directory `listings` keeps it out of that
+        # scan, and these overrides resolve it here instead.
+        #
+        # A style whose listing is the same in every design is taken from
+        # latexcv-common; one that a design sets differently is named locally,
+        # as sidebarleft does for `skills`.
+        #
+        # The paths are relative to this extension. Quarto rewrites them to be
+        # project-relative at render time, so they hold whether the extensions
+        # are installed at `_extensions/` or under an organisation at
+        # `_extensions/quarto-vitae/`.
+        templates:
+          detailed: ../latexcv-common/listings/detailed.tex
+          brief: ../latexcv-common/listings/brief.tex
+          skills: ../latexcv-common/listings/skills.tex

@@ -1,0 +1,164 @@
+$latexcv-preamble.tex()$
+
+%-------------------------------------------------------------------------------
+%	MINIMALISTIC
+%
+%	No filled bars and no rules between entries: headings are large, uppercase
+%	and black, and everything else is separated by space alone. The accent
+%	colour is spent on the entry titles rather than on furniture.
+%-------------------------------------------------------------------------------
+
+$if(geometry)$
+\geometry{$for(geometry)$$geometry$$sep$,$endfor$}
+$else$
+\geometry{top=1.5cm, bottom=1.5cm, left=2cm, right=2cm}
+$endif$
+
+%-------------------------------------------------------------------------------
+%	HEADINGS
+%-------------------------------------------------------------------------------
+\newcommand{\cvsection}[1]{%
+  \vspace{6pt}
+  \begin{flushleft}
+    \LARGE\textcolor{black}{\uppercase{#1}}
+  \end{flushleft}
+  \vspace{-4pt}}
+
+\newcommand{\cvsubsection}[1]{%
+  \vspace{6pt}
+  \begin{flushleft}
+    \large\textcolor{bgcol}{#1}
+  \end{flushleft}
+  \vspace{-4pt}}
+
+%-------------------------------------------------------------------------------
+%	ENTRIES
+%-------------------------------------------------------------------------------
+% Stacked rather than tabular: the title on its own line in the accent colour,
+% and the context beneath it in grey. Upstream sets the whole headline in a
+% \vbox so that an entry is never broken from its first line.
+\newcommand{\cventryhead}[4]{%
+  \textcolor{sectcol}{\textbf{#2}}\\
+  \textcolor{bgcol}{%
+    \ifthenelse{\isempty{#3}}{}{#3}%
+    \ifthenelse{\isempty{#4}}{}{\ifthenelse{\isempty{#3}}{}{, }\textit{#4}}%
+    \ifthenelse{\isempty{#1}}{}{\ifthenelse{\isempty{#3}}{\ifthenelse{\isempty{#4}}{}{ | }}{ | }#1}}}
+
+\newcommand{\vitaeentry}[5]{%
+  \begin{flushleft}
+    \vbox{\cventryhead{#1}{#2}{#3}{#4}\\[4pt]}
+    #5
+  \end{flushleft}
+  \vspace{2pt}}
+
+\newcommand{\vitaebrief}[4]{%
+  \begin{flushleft}
+    \vbox{\cventryhead{#1}{#2}{#3}{#4}}
+  \end{flushleft}
+  \vspace{3pt}}
+
+\newcommand{\vitaeskill}[2]{%
+  \noindent
+  \begin{tabular*}{\linewidth}{@{}p{\cvskillwidth}@{}p{\dimexpr\linewidth-\cvskillwidth\relax}@{}}
+    \textcolor{sectcol}{\textbf{#1}} & #2
+  \end{tabular*}\par\vspace{4pt}}
+
+% Plain dashes rather than chevrons or dots, in keeping with the rest.
+\newenvironment{vitaewhy}{%
+  \begin{itemize}[label=\textendash, topsep=0pt, partopsep=0pt, itemsep=2pt,
+                  parsep=0pt, leftmargin=1.4em, labelsep=0.5em]%
+}{%
+  \end{itemize}%
+}
+
+% The disc the photograph is cut to, and the chord the rule below it sits on.
+\newlength{\cvpicdiam}
+\newlength{\cvpicrad}
+\newlength{\cvpiccut}
+\newlength{\cvpicfloor}
+
+\begin{document}
+
+%-------------------------------------------------------------------------------
+%	PROFILE PICTURE (optional)
+%-------------------------------------------------------------------------------
+% Upstream's photograph is a disc whose foot the rule above the name cuts
+% across, so that the head sits over the rule and the rest of the circle is
+% never drawn. It gets that from its picture file -- a circle painted onto a
+% white square, laid over the rule and then covered by the white box its name
+% is set in. Neither half of that survives a photograph the document supplies:
+% an ordinary square one would put its corners over the rule, and anything but
+% a white page behind it would show the cover-up.
+%
+% So the shape is cut here instead of assumed. Two clips intersect: the disc,
+% and the rectangle standing on the chord \cvpiccut above its foot. What is left
+% is a circle with its bottom cut off, and the flat edge sits on the baseline
+% for the rule to be drawn against.
+$if(profilepic)$
+\setlength{\cvpicdiam}{$if(profilepic-width)$$profilepic-width$$else$0.3\linewidth$endif$}
+\setlength{\cvpicrad}{0.5\cvpicdiam}
+% Upstream cuts 8% of the diameter off the foot of the disc.
+\setlength{\cvpiccut}{0.08\cvpicdiam}
+\setlength{\cvpicfloor}{\dimexpr\cvpiccut-\cvpicrad\relax}
+{\parskip=0pt\relax\centering
+ \begin{tikzpicture}[baseline=(current bounding box.south)]
+   % Fixed first, so that the disc clipped inside it cannot grow the box back
+   % down to its uncut foot.
+   \useasboundingbox (-\cvpicrad,\cvpicfloor) rectangle (\cvpicrad,\cvpicrad);
+   \clip (-\cvpicrad,\cvpicfloor) rectangle (\cvpicrad,\cvpicrad);
+   \clip (0,0) circle (\cvpicrad);
+   \node[inner sep=0pt] at (0,0)
+     {\includegraphics[width=\cvpicdiam]{$profilepic$}};
+ \end{tikzpicture}\par}
+\nointerlineskip
+$endif$
+
+%-------------------------------------------------------------------------------
+%	TITLE
+%-------------------------------------------------------------------------------
+% \color rather than \textcolor: \textcolor opens a paragraph for its argument,
+% and the \parskip that comes with it would stand between the cut foot of the
+% photograph and the rule that is meant to be drawn against it. With no
+% photograph the rule is the first thing on the page, where that glue is
+% discarded anyway, so nothing moves.
+\begingroup\color{softcol}\hrule\endgroup
+\vspace{10pt}
+\begin{center}
+  \HUGE \textsc{$name$$if(surname)$ $surname$$endif$}%
+  $if(docname)$\cvtitlerule\textsc{$docname$}$endif$
+\end{center}
+
+$if(position)$
+\begin{center}
+  \small\textsc{$position$}
+\end{center}
+$endif$
+
+%-------------------------------------------------------------------------------
+%	CONTACT DETAILS
+%-------------------------------------------------------------------------------
+\vspace{4pt}
+\begin{center}
+  \footnotesize
+  \renewcommand{\cvcontactsep}{\hspace{14pt}}
+  \cvcontacts
+\end{center}
+
+\vspace{6pt}
+\textcolor{softcol}{\hrule}
+\vspace{4pt}
+
+\normalsize
+
+$latexcv-body.tex()$
+
+$if(footer)$
+\vspace{12pt}
+\textcolor{softcol}{\hrule}
+\vspace{4pt}
+\begin{center}
+  \footnotesize\textcolor{bgcol}{$footer$}
+\end{center}
+$endif$
+
+\end{document}

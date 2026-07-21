@@ -1,0 +1,295 @@
+$latexcv-preamble.tex()$
+
+%-------------------------------------------------------------------------------
+%	SIDEBAR LEFT
+%
+%	Despite the name, this is not `sidebar` with the column moved across. The
+%	two designs share only the fact of having two columns.
+%
+%	`sidebar` fills its column with the accent colour and sets it centred in
+%	white. This one leaves both columns on white and separates them with a thick
+%	rule in the page tint (upstream's \columnseprule of 4pt in `lightcol`), so
+%	there is no "sidebar" to style: the narrow column is set in the same black
+%	on white, left aligned, with the same headings as the wide one. What carries
+%	the design instead is the heading -- large, dark, uppercase, underscored by a
+%	short accent rule -- the filled title panel at the top of the wide column,
+%	and the accent-filled date badges on the entries.
+%-------------------------------------------------------------------------------
+
+\usepackage{paracol}
+
+$if(geometry)$
+\geometry{$for(geometry)$$geometry$$sep$,$endfor$}
+$else$
+\geometry{top=1cm, bottom=1cm, left=1cm, right=1cm}
+$endif$
+
+% Upstream's 0.31/2.2em, with a 4pt rule between the columns in the page tint.
+% The rule is what stands in for `sidebar`'s block of colour, and it is the only
+% thing marking the division -- so it is drawn rather than left to white space.
+\columnratio{$if(sidebar-ratio)$$sidebar-ratio$$else$0.31$endif$}
+\setlength{\columnsep}{$if(columnsep)$$columnsep$$else$2.2em$endif$}
+\setlength{\columnseprule}{4pt}
+\colseprulecolor{lightcol}
+
+%-------------------------------------------------------------------------------
+%	HEADINGS
+%-------------------------------------------------------------------------------
+% The accent rule under a heading is a fixed length, not a fraction of the
+% column: upstream writes \rule{0.1\textwidth}{2pt}, and \textwidth is the width
+% of the whole text block rather than of the column being set in. That is what
+% makes the rule under SKILLS in the narrow column and the one under WORK
+% EXPERIENCE in the wide one come out the same length, which is what stops the
+% two columns reading as two different documents.
+%
+% Measured once the page geometry has settled, and before paracol has begun, so
+% both columns are given the same value.
+\newlength{\cvsectionrule}
+\AtBeginDocument{\setlength{\cvsectionrule}{0.1\textwidth}}
+
+% Set as a tabular rather than as two paragraphs, as upstream's \cvtext is. The
+% rule has to sit tight under a \LARGE line, and between paragraphs that gap is
+% \parskip plus a baselineskip taken from the body size -- neither of which
+% knows how tall the line above it was. A tabular row separation is stated
+% outright and does.
+\newcommand{\cvsection}[1]{%
+  \vspace{14pt}%
+  \noindent\begin{tabular}{@{}l@{}}
+    {\LARGE\bfseries\textcolor{bgcol}{\uppercase{#1}}}\\[-3pt]
+    \textcolor{sectcol}{\rule{\cvsectionrule}{2pt}}
+  \end{tabular}\par
+  \vspace{4pt}}
+
+% Upstream has no second level here. A step down from \cvsection: the same dark
+% bold, without the rule, since a rule of the same fixed width under both would
+% make the two levels hard to tell apart.
+\newcommand{\cvsubsection}[1]{%
+  \vspace{6pt}%
+  \noindent{\large\bfseries\textcolor{bgcol}{#1}}\par
+  \vspace{2pt}}
+
+%-------------------------------------------------------------------------------
+%	ENTRIES
+%-------------------------------------------------------------------------------
+% The headline: the title in bold black on the left, the date in white on an
+% accent-filled badge hard against the right margin, and the institution on the
+% line beneath in accent bold.
+%
+% Upstream sets the badge at a fixed \makebox[0.25\mpwidth]. The width is taken
+% from the measured date column here instead, so the badges are as wide as the
+% longest date in the document and no wider, and every badge in a listing is the
+% same width -- a fixed quarter-column is either loose around `1911` or too
+% tight for `Sep 15 - NOW`. See MEASURED COLUMNS in latexcv-preamble.tex.
+%
+% The left column is the line width less the badge, the \fboxsep \colorbox adds
+% on either side of it, and one \cvcolsep -- so the badge ends flush with the
+% text block, and a title long enough to fill its column still keeps a gutter
+% between itself and the badge rather than running up against it.
+% The width left for the title once the badge has taken its share.
+\newcommand{\cventrytitlewidth}{\dimexpr\linewidth-\cvwhenwidth-2\fboxsep-\cvcolsep\relax}
+
+% The badge itself, or nothing at all for an entry with no date -- an empty
+% badge is a bar of flat colour with no reason to be there.
+\newcommand{\cventrybadge}[1]{%
+  \ifthenelse{\isempty{#1}}{}{%
+    \colorbox{sectcol}{\makebox[\cvwhenwidth][c]{\textcolor{white}{#1}}}}}
+
+% `with` is upstream's employer line, in accent bold. `where` has no slot of its
+% own upstream, so it follows in the dark neutral -- close enough to read as
+% subordinate to the institution it qualifies.
+\newcommand{\cventrywith}[2]{%
+  \ifthenelse{\isempty{#1}}{}{\textcolor{sectcol}{\textbf{#1}}}%
+  \ifthenelse{\isempty{#2}}{}{%
+    \ifthenelse{\isempty{#1}}{}{\textcolor{bgcol}{,}\hspace{0.25em}}%
+    \textit{\textcolor{bgcol}{#2}}}}
+
+\newcommand{\cventryhead}[4]{%
+  \noindent
+  \begin{tabular*}{\linewidth}{@{}p{\cventrytitlewidth}@{\extracolsep{\fill}}r@{}}
+    \textcolor{black}{\textbf{#2}} & \cventrybadge{#1}
+  \end{tabular*}\par
+  \ifthenelse{\isempty{#3}\AND\isempty{#4}}{}{%
+    \vspace{1pt}%
+    \noindent\cventrywith{#3}{#4}\par}}
+
+% No rule under the headline: upstream separates entries by the space above the
+% next one and by the badge marking where each begins, and a hairline across a
+% column this wide would read as a section division rather than an entry one.
+\newcommand{\vitaeentry}[5]{%
+  \vspace{8pt}%
+  \cventryhead{#1}{#2}{#3}{#4}%
+  \vspace{4pt}%
+  #5%
+  \par\vspace{4pt}}
+
+% One line, not the two \cventryhead sets. `brief` exists to be a single line
+% per entry -- that is the whole of what distinguishes it from `detailed` once
+% the bullets are gone -- so the institution follows the title on its line
+% instead of taking one of its own. It keeps the badge, so a brief listing still
+% lines up with a detailed one above it.
+\newcommand{\vitaebrief}[4]{%
+  \vspace{6pt}%
+  \noindent
+  \begin{tabular*}{\linewidth}{@{}p{\cventrytitlewidth}@{\extracolsep{\fill}}r@{}}
+    \textcolor{black}{\textbf{#2}}%
+    \ifthenelse{\isempty{#3}\AND\isempty{#4}}{}{\hspace{0.5em}\cventrywith{#3}{#4}}%
+    & \cventrybadge{#1}
+  \end{tabular*}\par}
+
+% Category beside its members, as in the five designs that are not `sidebar`.
+% Every entries listing is set in the wide column, which has room for the two
+% side by side -- and for the ten stars of a rating beside them, so
+% \cvstarsbreak is left empty here.
+\newcommand{\vitaeskill}[2]{\cvskillrow{#1}{#2}}
+
+% Upstream's bullets are the plain round ones, not the chevrons the other
+% designs mark a list with.
+\newenvironment{vitaewhy}{%
+  \begin{itemize}[topsep=2pt, partopsep=0pt, itemsep=3pt, parsep=0pt,
+                  leftmargin=1.6em, labelsep=0.5em]%
+}{%
+  \end{itemize}%
+}
+
+%-------------------------------------------------------------------------------
+%	RATING BARS
+%-------------------------------------------------------------------------------
+% `sidebarleft` is the one upstream design that sets a skill as a labelled
+% rating bar rather than as a line of text, and its \cvskill takes three
+% arguments to do it: the name, a label such as "5+ yrs", and the fraction of
+% the bar to fill.
+%
+% This is why the designs are packaged separately. A listing shared across all
+% seven could only call macros they all define, so a third field had nowhere to
+% go and the bars were lost. Here `listings/skills.tex` belongs to this design
+% alone and calls whatever this design defines.
+%
+% #3 is a bare fraction between 0 and 1, the same value the `bar` shortcode
+% resolves its argument to -- and the drawing is the same \cvbar, so a skill
+% given a `level` column and one written `{{< bar 80% >}}` come out identical.
+% The bar is widened to the full measure here because it has a line to itself,
+% against the narrower default that lets one sit inline beside its text.
+\newcommand{\vitaeskillbar}[3]{%
+  \noindent
+  \begin{tabular*}{\linewidth}{@{}p{0.72\linewidth}@{\extracolsep{\fill}}r@{}}
+    \textcolor{black}{\textbf{#1}} & \textcolor{sectcol}{#2}
+  \end{tabular*}\par
+  % \noindent and \cvbar's baseline-anchored picture keep the bar tight under
+  % its label: a tikzpicture is a box on a line of its own, so without this the
+  % paragraph skip above and below it doubles the height of every skill.
+  \vspace{-5pt}
+  \noindent{\renewcommand{\cvbarwidth}{\linewidth}\cvbar{#3}}\par
+  \vspace{1pt}}
+
+%-------------------------------------------------------------------------------
+%	TITLE PANEL (wide column)
+%-------------------------------------------------------------------------------
+% The filled panel the wide column opens with: the name in white caps, a short
+% white rule under it, and the position beneath. Upstream fixes it at 3.5cm and
+% centres the block vertically in it, so the panel is the same depth whether or
+% not there is a position to set.
+%
+% \parskip is zeroed inside: the three lines are spaced by the \vspace between
+% them, and a document-level \parskip would add itself to each of those.
+\newcommand{\cvtitleblock}{%
+  \noindent\colorbox{bgcol}{%
+    \begin{minipage}[c][$if(titlebox-height)$$titlebox-height$$else$3.5cm$endif$][c]{\dimexpr\linewidth-2\fboxsep\relax}
+      \setlength{\parskip}{0pt}%
+      \centering
+      {\HUGE\bfseries\textcolor{white}{\uppercase{$name$$if(surname)$ $surname$$endif$}}}\par
+      \vspace{8pt}
+      {\color{white}\rule{\cvsectionrule}{1.25pt}}\par
+      \vspace{8pt}
+      {\large\textcolor{white}{$if(position)$$position$$else$$docname$$endif$}}\par
+    \end{minipage}}\par
+  \vspace{4pt}}
+
+%-------------------------------------------------------------------------------
+%	NARROW COLUMN
+%-------------------------------------------------------------------------------
+% One item from the document's `sidebar:` front matter. Left aligned and in the
+% body colour, like everything else in this design -- the column is not a
+% styled object here, only a narrower measure.
+\newcommand{\cvsidebaritem}[1]{\noindent#1\par\vspace{3pt}}
+
+% Contacts: an accent-coloured icon and then the detail in black, one per line,
+% as upstream's \icontext sets them. \hangindent keeps a detail too long for the
+% column -- an address, usually -- aligned under itself on its second line
+% rather than back under the icon.
+%
+% \begingroup keeps the redefinitions local, so a document emitting contacts
+% twice does not get this one-per-line form the second time.
+\newcommand{\cvsidebarcontacts}{%
+  \begingroup
+  \cvcontactsreset
+  \renewcommand{\cvcontactsep}{\par\vspace{6pt}}%
+  \renewcommand{\cvcontact}[2]{%
+    \ifcvfirstcontact\cvfirstcontactfalse\else\cvcontactsep\fi
+    \noindent\hangindent=1.5em\hangafter=1
+    \textcolor{sectcol}{\faIcon{##1}}\hspace{0.5em}##2}%
+  \cvcontacts\par
+  \endgroup}
+
+% The narrow column's content, in upstream's order: the photograph hard against
+% the top and full column width, then the `sidebar:` sections, then the
+% contacts, then the QR code at the foot.
+\newcommand{\cvsidebarbody}{%
+  % \begingroup, because a paracol column is not a group: without it the
+  % redefinition below survives \switchcolumn and applies to the wide column
+  % too. There it lands inside the tabular of a skills listing, where \\ ends
+  % the row rather than the line, and every rated skill loses its members to a
+  % row of its own.
+  \begingroup
+  % The column is a third of the page, so a rating does not fit beside what it
+  % rates and is given the line below it. Local to this column: an entries
+  % listing in the wide column has room for both on one line.
+  \renewcommand{\cvstarsbreak}{\\}%
+  % A bar in this column is set the same way, and spans the column once it has
+  % a line to itself -- which is the shape upstream draws its skills in.
+  \renewcommand{\cvbarbreak}{\\}%
+  \renewcommand{\cvbarwidth}{\linewidth}%
+$if(profilepic)$
+  % Full width and unframed, as upstream sets it -- the photograph squares off
+  % the top of the column rather than floating centred in it.
+  \noindent\includegraphics[width=$if(profilepic-width)$$profilepic-width$$else$\linewidth$endif$]{$profilepic$}\par
+$endif$
+$for(sidebar)$
+  \cvsection{$sidebar.title$}
+$for(sidebar.items)$
+  \cvsidebaritem{$sidebar.items$}
+$endfor$
+$endfor$
+  \cvsection{$if(contacts-title)$$contacts-title$$else$Contact$endif$}
+  \cvsidebarcontacts
+$if(qrcode)$
+  % Pushed to the foot of the column, where upstream puts it. \null gives the
+  % \vfill something to push against; without it the glue is at the end of the
+  % column and is discarded.
+  \vfill\null
+  \begin{center}
+    \includegraphics[width=$if(qrcode-width)$$qrcode-width$$else$0.7\linewidth$endif$]{$qrcode$}
+  \end{center}
+$endif$
+  \endgroup}
+
+\begin{document}
+
+\begin{paracol}{2}
+
+%-------------------------------------------------------------------------------
+%	NARROW COLUMN
+%-------------------------------------------------------------------------------
+\cvsidebarbody
+
+%-------------------------------------------------------------------------------
+%	WIDE COLUMN
+%-------------------------------------------------------------------------------
+\switchcolumn
+
+\cvtitleblock
+
+$latexcv-body.tex()$
+
+\end{paracol}
+
+\end{document}

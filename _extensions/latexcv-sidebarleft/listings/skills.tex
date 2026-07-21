@@ -1,0 +1,28 @@
+$-- A category paired with its members, as elsewhere -- but this design can also
+$-- draw a rating bar, so an entry carrying a `level` column is set as one.
+$--
+$-- `level` is a bare fraction between 0 and 1. The filter passes every column
+$-- through under its own name, so nothing needs configuring to introduce it: a
+$-- table with a `level` heading is enough.
+$--
+$-- Entries without `level` fall back to the plain two-field form, so a document
+$-- written for any of the other six designs still renders here.
+$--
+$-- Only those fallback entries are measured, and only they share the resulting
+$-- column width: a rating bar sets its label on its own line above the bar, so
+$-- it has no label column to align to. See MEASURED COLUMNS in latexcv-preamble.tex.
+\begin{vitaeskills}%
+$for(entries)$$if(entries.level)$$else$\cvmeasureskill{$entries.what$}$endif$$endfor$\cvskillsready%
+$for(entries)$
+$if(entries.level)$
+\vitaeskillbar
+  {$entries.what$} % what
+  {$if(entries.with)$$entries.with$$else$$for(entries.why)$$entries.why$$sep$, $endfor$$endif$} % with, or why
+  {$entries.level$} % level
+$else$
+\vitaeskill
+  {$entries.what$} % what
+  {$if(entries.with)$$entries.with$$else$$for(entries.why)$$entries.why$$sep$, $endfor$$endif$} % with, or why
+$endif$
+$endfor$
+\end{vitaeskills}

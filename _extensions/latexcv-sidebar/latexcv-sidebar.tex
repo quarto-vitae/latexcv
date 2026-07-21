@@ -1,0 +1,57 @@
+$latexcv-preamble.tex()$
+
+%-------------------------------------------------------------------------------
+%	SIDEBAR
+%
+%	The main content at the left, and a filled column of contact details and
+%	skills down the right. Everything but the column order is shared with
+%	`sidebarleft`.
+%-------------------------------------------------------------------------------
+
+$if(geometry)$
+\geometry{$for(geometry)$$geometry$$sep$,$endfor$}
+$else$
+\geometry{top=1.25cm, bottom=1.5cm, left=1.5cm, right=1.5cm}
+$endif$
+
+$latexcv-sidebar-common.tex()$
+
+% Main column first, so it takes the larger share.
+\columnratio{$if(main-ratio)$$main-ratio$$else$0.66$endif$}
+
+% Tints column 1 (the right-hand one) the whole way down, across as many pages
+% as the CV runs to. This is what a pair of minipages cannot do.
+%
+% The tint is extended \cvsidebarpad to either side of the column, which is
+% where the column's horizontal padding comes from; see COLUMN PADDING in
+% latexcv-sidebar-common.tex. Extending it rightwards takes it into the page
+% margin, so the sidebar carries a little further towards the paper edge than
+% the main column does.
+%
+% The extension goes inside the region argument, not after it: paracol closes
+% the region with \@nil the moment that argument ends, so `{c[1]}(10pt,0pt)`
+% leaves the parenthesis to be read as the colour and fails with "Undefined
+% color `('".
+\backgroundcolor{c[1](\cvsidebarpad,0pt)}{sectcol}
+
+\begin{document}
+
+\begin{paracol}{2}
+
+%-------------------------------------------------------------------------------
+%	MAIN COLUMN
+%-------------------------------------------------------------------------------
+\cvtitleblock
+
+$latexcv-body.tex()$
+
+%-------------------------------------------------------------------------------
+%	SIDEBAR COLUMN
+%-------------------------------------------------------------------------------
+\switchcolumn
+
+\cvsidebarbody
+
+\end{paracol}
+
+\end{document}

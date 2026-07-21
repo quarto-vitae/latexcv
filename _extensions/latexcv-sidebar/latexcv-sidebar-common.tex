@@ -1,0 +1,216 @@
+%-------------------------------------------------------------------------------
+%	SIDEBAR -- DEFINITIONS
+%
+%	Everything `sidebar` is, apart from its page geometry and the order of the
+%	two columns.
+%
+%	This was once shared with `sidebarleft`, on the assumption that the two
+%	designs differed only in which side the filled column fell on. They do not:
+%	upstream's `sidebarleft` tints neither column and sets both in black on
+%	white, so it has no filled column to mirror and now defines its own macros
+%	in latexcv-sidebarleft.tex. Nothing else reads this file.
+%
+%	Upstream sets both as a pair of minipages side by side. A minipage cannot
+%	break across a page, so that fixes the CV at one page and silently
+%	overflows once it grows. `paracol` is used here instead: it flows two
+%	independent columns across as many pages as they need, and can tint one of
+%	them the whole way down.
+%-------------------------------------------------------------------------------
+
+\usepackage{paracol}
+
+%-------------------------------------------------------------------------------
+%	COLUMN PADDING
+%-------------------------------------------------------------------------------
+% Breathing space between the edges of the filled column and the text set on
+% it. Upstream has none to inherit: its sidebar is a minipage of the full
+% column width, and its contents sit hard against the tint on all four sides.
+%
+% The tint is grown outwards rather than the text inset, because the column is
+% set centred -- a line inset by a parbox or by \leftskip would still centre on
+% whatever it was inset into, and every centred heading in the column would
+% shift with it. \backgroundcolor takes the extension, so the text column is
+% left exactly where it is and only the colour reaches past it.
+\newlength{\cvsidebarpad}
+\setlength{\cvsidebarpad}{10pt}
+
+% Gap between the filled column and the text beside it. The tint eats
+% \cvsidebarpad of this on its way out, so the separation left between the two
+% columns is what remains.
+\setlength{\columnsep}{\dimexpr$if(columnsep)$$columnsep$$else$18pt$endif$+\cvsidebarpad\relax}
+
+%-------------------------------------------------------------------------------
+%	HEADINGS (main column)
+%-------------------------------------------------------------------------------
+\newcommand{\cvsection}[1]{%
+  \vspace{4pt}
+  \colorbox{sectcol}{\mystrut\makebox[\linewidth][l]{%
+    \cvchevrons{bgcol}\hspace{4pt}%
+    \textcolor{white}{\textbf{\uppercase{#1}}}\hspace{4pt}}}\\
+  \vspace{2pt}}
+
+\newcommand{\cvsubsection}[1]{%
+  \vspace{4pt}
+  {\larrow{sectcol}\hspace{2pt}\textcolor{bgcol}{\textbf{#1}}}\par
+  \vspace{2pt}}
+
+%-------------------------------------------------------------------------------
+%	ENTRIES (main column)
+%-------------------------------------------------------------------------------
+% The main column is about two thirds of the page, so the date joins `with` at
+% the right rather than taking a column of its own. The split is close to even
+% because that right-hand cell carries two fields: at upstream's 0.55/0.42 an
+% institution and a date range together spill onto a second line and leave the
+% tail of the date stranded there on its own.
+\newcommand{\cventryhead}[4]{%
+  \begin{tabular*}{\linewidth}{@{}p{0.48\linewidth}@{\extracolsep{\fill}}x{0.48\linewidth}@{}}
+    \textcolor{black}{\textbf{#2}} &
+    \ifthenelse{\isempty{#3}}{}{\textcolor{complcol}{#3}}%
+    \ifthenelse{\isempty{#4}}{}{\ifthenelse{\isempty{#3}}{}{, }\textit{\textcolor{complcol}{#4}}}%
+    \ifthenelse{\isempty{#1}}{}{\ifthenelse{\isempty{#3}}{\ifthenelse{\isempty{#4}}{}{, }}{, }\textcolor{bgcol}{#1}}
+  \end{tabular*}}
+
+\newcommand{\vitaeentry}[5]{%
+  \vspace{4pt}
+  \cventryhead{#1}{#2}{#3}{#4}
+  \vspace{-10pt}
+  \textcolor{softcol}{\hrule}
+  \vspace{6pt}
+  #5}
+
+\newcommand{\vitaebrief}[4]{%
+  \vspace{4pt}
+  \cventryhead{#1}{#2}{#3}{#4}}
+
+% A skill over two lines, the category and then its members beneath it, rather
+% than the two side by side as the other designs set them.
+%
+% This is upstream's own shape for a rated field: its `Fields` metasection sets
+% the name on one line and the run of stars on the next. A rating is wide --
+% ten stars are most of a column -- so beside a category it either crowds it or
+% wraps, and the fold lands in the middle of the rating.
+%
+% The whole listing follows it, not only the rated entries, so that a listing
+% mixing the two keeps one shape. \cvskillrow and the measured column it uses
+% are still in the shared preamble for the five designs that set the two side
+% by side; the measuring pass the listing runs is simply unused here.
+%
+% The two lines are one paragraph broken by \\*, not two paragraphs: \parskip
+% is 6pt here, so a \par between them would set the members further from the
+% category they belong to than the next entry is. Starred, so the pair cannot
+% be split across a page. An empty second field is dropped rather than set as a
+% blank line, so an entry with nothing but a category is one line.
+\newcommand{\vitaeskill}[2]{%
+  \vspace{2pt}
+  \noindent\textbf{#1}%
+  \ifthenelse{\isempty{#2}}{}{\\*#2}%
+  \par\vspace{2pt}}
+
+\newenvironment{vitaewhy}{%
+  \begin{itemize}[label=\larrow{softcol}, topsep=0pt, partopsep=0pt, itemsep=3pt,
+                  parsep=0pt, leftmargin=1.4em, labelsep=0.4em]%
+}{%
+  \end{itemize}%
+}
+
+%-------------------------------------------------------------------------------
+%	SIDEBAR
+%-------------------------------------------------------------------------------
+% A heading in the filled column: white, uppercase, over a rule. Set as an
+% environment rather than a command so the rule closes the group of items
+% under it.
+\newenvironment{cvsidebarsection}[1]{%
+  \vspace{8pt}
+  \begin{center}
+    % A rating set on the filled column takes upstream's pair of colours for
+    % it: the complementary accent for the filled stars, the column's own white
+    % for the rest. The default pair is for a rating set on the page, and its
+    % filled half is `sectcol` -- which is the colour of this column, so a
+    % rating would otherwise disappear into it. Local to the environment, so
+    % the main column is unaffected.
+    \renewcommand{\cvstarfullcolor}{complcol}%
+    \renewcommand{\cvstaremptycolor}{white}%
+    % A bar is recoloured for the same reason and to the same pair: drawn in the
+    % defaults its filled half is `sectcol` on `sectcol`, so the one part of it
+    % that carries the rating is the one part that cannot be seen.
+    \renewcommand{\cvbarfullcolor}{complcol}%
+    \renewcommand{\cvbaremptycolor}{white}%
+    % And on its own line, under whatever it rates, as upstream sets its
+    % `Fields`. The column is a third of the page: ten stars are most of its
+    % width, so a rating beside a label wraps and the fold lands mid-rating. A
+    % bar takes the whole column once it has that line to itself.
+    \renewcommand{\cvstarsbreak}{\\}%
+    \renewcommand{\cvbarbreak}{\\}%
+    \renewcommand{\cvbarwidth}{\linewidth}%
+    \textcolor{white}{\large\uppercase{#1}}\\[2pt]
+    \parbox{0.8\linewidth}{\textcolor{white}{\hrule}}\\[4pt]
+    \normalsize
+}{%
+  \end{center}
+  \vspace{-6pt}}
+
+\newcommand{\cvsidebaritem}[1]{\textcolor{white}{#1}\\[2pt]}
+
+% Contacts in the filled column: one per line, white, and centred, as upstream
+% sets them -- its \icontext lines sit inside the `center` of a metasection,
+% so each is centred on the column rather than aligned down a left edge.
+% \begingroup keeps the redefinitions local: \cvcontact is the shared one
+% again as soon as this returns, so a document emitting contacts twice does
+% not get the sidebar's white, one-per-line form the second time.
+\newcommand{\cvsidebarcontacts}{%
+  \begingroup
+  \cvcontactsreset
+  \renewcommand{\cvcontactsep}{\\[3pt]}%
+  \renewcommand{\cvcontact}[2]{%
+    \ifcvfirstcontact\cvfirstcontactfalse\else\cvcontactsep\fi
+    \textcolor{white}{\faIcon{##1}~##2}}%
+  {\small\cvcontacts\par}%
+  \endgroup}
+
+%-------------------------------------------------------------------------------
+%	TITLE (main column)
+%-------------------------------------------------------------------------------
+\newcommand{\cvtitleblock}{%
+  \begin{flushleft}
+    \HUGE\textsc{$name$$if(surname)$ $surname$$endif$}%
+    $if(docname)$\cvtitlerule\textsc{$docname$}$endif$
+    $if(position)$\\[4pt]\small\textsc{$position$}$endif$
+  \end{flushleft}
+  \vspace{2pt}
+  \textcolor{softcol}{\hrule}
+  \vspace{4pt}}
+
+%-------------------------------------------------------------------------------
+%	SIDEBAR CONTENT
+%-------------------------------------------------------------------------------
+% Filled from the document's `sidebar:` front matter, which is a list of
+% sections each with a `title` and a list of `items`. The contact details are
+% emitted first, since in these styles they belong in the column rather than
+% under the name.
+\newcommand{\cvsidebarbody}{%
+  % Starred, because an ordinary \vspace at the top of a column is discarded --
+  % which is exactly why the column's first heading sits hard against the tint
+  % despite the one \cvsidebarsection opens with.
+  \vspace*{\cvsidebarpad}%
+$if(profilepic)$
+  \begin{center}
+    \includegraphics[width=$if(profilepic-width)$$profilepic-width$$else$0.7\linewidth$endif$]{$profilepic$}
+  \end{center}
+  \vspace{4pt}
+$endif$
+  \begin{cvsidebarsection}{$if(contacts-title)$$contacts-title$$else$Contact$endif$}
+    \cvsidebarcontacts
+  \end{cvsidebarsection}
+$for(sidebar)$
+  \begin{cvsidebarsection}{$sidebar.title$}
+$for(sidebar.items)$
+    \cvsidebaritem{$sidebar.items$}
+$endfor$
+  \end{cvsidebarsection}
+$endfor$
+$if(qrcode)$
+  \begin{center}
+    \includegraphics[width=$if(qrcode-width)$$qrcode-width$$else$0.55\linewidth$endif$]{$qrcode$}
+  \end{center}
+$endif$
+}

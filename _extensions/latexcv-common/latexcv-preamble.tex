@@ -1,0 +1,591 @@
+%!TEX TS-program = pdflatex
+%!TEX encoding = UTF-8 Unicode
+%
+% latexcv -- a collection of CV/resume styles
+%
+% This template has been adapted from:
+% https://github.com/jankapunkt/latexcv
+%
+% Author:
+% Jan Kuester <info@jankuester.com>
+%
+% Adapted to be a Quarto template by Mitchell O'Hara-Wild
+%
+% Template license:
+% MIT (https://github.com/jankapunkt/latexcv/blob/master/LICENSE)
+%
+% Everything the styles have in common: class options, the font stack, the
+% colour palette, the tikz arrow marks their headings are built from, and
+% Pandoc's own preamble. Each `latexcv-<style>.tex` calls this first, then
+% defines the four style-specific pieces described at the bottom of this file.
+%
+% Upstream ships each style as a standalone `main.tex` with its content written
+% inline, so there is no class file to copy and nothing shared between the
+% styles but their conventions. This partial is where those conventions are
+% made explicit, so the styles differ only where they actually look different.
+%-------------------------------------------------------------------------------
+%	DOCUMENT DEFINITION
+%-------------------------------------------------------------------------------
+$passoptions.latex()$
+%
+% Upstream uses the article class, so that the page is fully under the
+% template's control rather than a CV class's.
+$doc-class.tex()$
+
+%-------------------------------------------------------------------------------
+%	ENCODING
+%-------------------------------------------------------------------------------
+% Every latexcv style is a pdflatex document; `iftex` guards these so that a
+% document overriding `pdf-engine` to xelatex or lualatex still builds, since
+% both provide UTF-8 input and modern font handling natively.
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[$if(fontenc)$$fontenc$$else$T1$endif$]{fontenc}
+\fi
+
+%-------------------------------------------------------------------------------
+%	LOGIC
+%-------------------------------------------------------------------------------
+% Provides the \isempty test the entry macros use to tell an absent field from
+% a supplied one, so that an entry without (say) a location does not leave a
+% stray separator behind.
+\usepackage{xifthen}
+
+%-------------------------------------------------------------------------------
+%	FONT
+%-------------------------------------------------------------------------------
+% Raleway is upstream's default, with the sans face made the document default.
+% The alternatives upstream comments out (droidsans, comfortaa, cmbright,
+% fetamont, gillius, iwona, roboto) are all reachable from the document, since
+% the font-settings partial called below honours `fontfamily` -- so
+% `fontfamily: roboto` and `fontfamilyoptions: [thin]` swap the stack without
+% touching this file.
+$if(fontfamily)$
+$else$
+\ifPDFTeX
+  \usepackage[default]{raleway}
+\fi
+$endif$
+\renewcommand*\familydefault{\sfdefault}
+
+% Upstream's headings reach for \HUGE and \ssmall, which are beyond the
+% standard size commands.
+\usepackage{moresize}
+
+%-------------------------------------------------------------------------------
+%	PAGE LAYOUT
+%-------------------------------------------------------------------------------
+% Each style sets its own default margins, since a full-bleed sidebar and a
+% centred classic page want very different ones. `geometry` in the document
+% front matter overrides whatever the style chose.
+\usepackage{geometry}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% fancyhdr measures \headwidth once, when it is loaded. Each style calls
+% \geometry after this partial, so by then the measurement is stale and the
+% header and footer are centred on the wrong width -- visibly off to one side
+% once `pagenumbers` puts something in the footer. Re-measured at the start of
+% the document, once the page geometry has settled.
+\AtBeginDocument{\setlength{\headwidth}{\textwidth}}
+% Upstream's CVs are unnumbered; set `pagenumbers: true` to keep them.
+$if(pagenumbers)$
+$else$
+\renewcommand{\thepage}{}
+$endif$
+\renewcommand{\thesection}{}
+\setlength{\headheight}{-5pt}
+\setlength{\parindent}{0mm}
+
+%-------------------------------------------------------------------------------
+%	TABLE / ARRAY DEFINITIONS
+%-------------------------------------------------------------------------------
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{enumitem}
+
+% A right-aligned fixed-width column, used for the date column of an entry.
+\newcolumntype{x}[1]{>{\raggedleft\hspace{0pt}}p{#1}}
+
+%-------------------------------------------------------------------------------
+%	GRAPHICS
+%-------------------------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{shapes, backgrounds, mindmap, trees}
+
+% Icons for the contact details. Upstream's older styles load `fontawesome`
+% (v4) and the newer ones `fontawesome5`; v5 is used throughout here so that
+% one icon name means the same thing in every style.
+\usepackage{fontawesome5}
+
+%-------------------------------------------------------------------------------
+%	COLOURS
+%-------------------------------------------------------------------------------
+\usepackage{color}
+\usepackage{xcolor}
+
+% Upstream's palette, as document options. `headcolor` is accepted as an alias
+% for `sectcol` so that the same front matter drives this template and the
+% other quarto-vitae templates, which all name their accent colour that way.
+$if(sectcol)$
+\definecolor{sectcol}{HTML}{$sectcol$}
+$else$
+$if(headcolor)$
+\definecolor{sectcol}{HTML}{$headcolor$}
+$else$
+\definecolor{sectcol}{RGB}{0,150,255}
+$endif$
+$endif$
+
+% Dark neutral, for the secondary half of an entry headline.
+$if(bgcol)$
+\definecolor{bgcol}{HTML}{$bgcol$}
+$else$
+\definecolor{bgcol}{RGB}{110,110,110}
+$endif$
+
+% Light neutral, for the hairlines between entries.
+$if(softcol)$
+\definecolor{softcol}{HTML}{$softcol$}
+$else$
+\definecolor{softcol}{RGB}{225,225,225}
+$endif$
+
+% Complementary accent, used by the sidebar styles for dates and links set
+% against the filled column.
+$if(complcol)$
+\definecolor{complcol}{HTML}{$complcol$}
+$else$
+\definecolor{complcol}{RGB}{250,150,10}
+$endif$
+
+% Page tint, used by `rows` for the shaded bands behind alternate sections.
+%
+% Upstream's own value, and darker than a tint usually wants to be, because in
+% `rows` it is not a highlight but half of a stripe: the bands alternate with
+% white and have no rule between them, so the difference between the two is the
+% only thing separating one section from the next. It is also darker than
+% `softcol`, which is what lets the hairlines inside a band read against it.
+$if(lightcol)$
+\definecolor{lightcol}{HTML}{$lightcol$}
+$else$
+\definecolor{lightcol}{RGB}{210,210,210}
+$endif$
+
+%-------------------------------------------------------------------------------
+%	ARROW GRAPHICS
+%-------------------------------------------------------------------------------
+% The six-pointed chevrons upstream builds its section headings and bullet
+% marks from.
+
+% Pointing left.
+\newcommand{\tzlarrow}{(0,0) -- (0.2,0) -- (0.3,0.2) -- (0.2,0.4) -- (0,0.4) -- (0.1,0.2) -- cycle;}
+\newcommand{\larrow}[1]{%
+  \begin{tikzpicture}[scale=0.58]
+    \filldraw[fill=#1!100,draw=#1!100!black] \tzlarrow
+  \end{tikzpicture}}
+
+% Pointing right.
+\newcommand{\tzrarrow}{(0,0.2) -- (0.1,0) -- (0.3,0) -- (0.2,0.2) -- (0.3,0.4) -- (0.1,0.4) -- cycle;}
+\newcommand{\rarrow}[1]{%
+  \begin{tikzpicture}[scale=0.7]
+    \filldraw[fill=#1!100,draw=#1!100!black] \tzrarrow
+  \end{tikzpicture}}
+
+% A run of overlapping chevrons, used to open a section heading.
+%
+% Upstream writes this inline as `\larrow{c} \hspace{-8pt} \larrow{c}`, where
+% the interword spaces either side of the kern are load-bearing: a chevron is
+% 0.3cm at scale 0.58, so about 4.95pt wide, and at 10pt the two spaces add back
+% about 6.7pt. Each chevron therefore advances roughly 3.6pt.
+%
+% Written without those spaces the kern is a net -3.05pt, so each chevron lands
+% to the *left* of the one before it: the run walks backwards out of the
+% heading's coloured box and never displaces the text it is supposed to precede.
+% The overlap is set here as an explicit kern so that it states its own size and
+% cannot be lost to reflowing whitespace.
+\newlength{\cvchevronoverlap}
+\setlength{\cvchevronoverlap}{0.8pt}
+
+% \rarrow is drawn at scale 0.7 against \larrow's 0.58, so it is about a fifth
+% wider (5.97pt) and takes a proportionally wider kern to overlap by the same
+% share of a chevron.
+\newlength{\cvchevronroverlap}
+\setlength{\cvchevronroverlap}{0.97pt}
+
+\makeatletter
+\newcommand{\cv@chevronrun}[4]{%
+  \@tempcnta=0\relax
+  \@whilenum\@tempcnta<#1\do{%
+    \ifnum\@tempcnta>0 \hspace{-#2}\fi
+    #3{#4}%
+    \advance\@tempcnta by 1\relax}}
+
+% \cvchevrons[count]{colour} -- pointing left, three unless told otherwise.
+\newcommand{\cvchevrons}[2][3]{\cv@chevronrun{#1}{\cvchevronoverlap}{\larrow}{#2}}
+
+% \cvchevronsright[count]{colour} -- the same run, pointing right.
+\newcommand{\cvchevronsright}[2][3]{\cv@chevronrun{#1}{\cvchevronroverlap}{\rarrow}{#2}}
+\makeatother
+
+%-------------------------------------------------------------------------------
+%	STAR RATINGS
+%-------------------------------------------------------------------------------
+% A run of filled stars followed by empty ones, as `sidebar` rates its fields:
+% ten \icon{Star} glyphs per line, the first few in the complementary accent
+% and the rest in the column's background colour.
+%
+% Reached from a document through the `stars` shortcode rather than through a
+% field on an entry -- `{{< stars 8/10 >}}` in any cell of any listing, or in
+% ordinary text. A rating is a way of writing a value, not a kind of value, so
+% it belongs to the content and not to the entries interface. It is also why
+% the two colours are commands: a listing set on the tinted column of a sidebar
+% style needs a different pair from one set on the page, and can say so
+% locally without either of them being an option on the document.
+\newcommand{\cvstarfullcolor}{sectcol}
+\newcommand{\cvstaremptycolor}{softcol}
+
+% Set before the run of stars, so that a design can give a rating a line of its
+% own by making this a line break. Empty by default: on the page there is room
+% for a rating beside what it rates.
+%
+% A rating written with nothing before it then opens with an empty line, which
+% is a rating of nothing and not worth guarding against -- \lastnodetype cannot
+% tell the start of a line from the middle of one here, and the guard fires the
+% break at the start of an item either way.
+\newcommand{\cvstarsbreak}{}
+
+% Upstream draws both halves with the same solid glyph, distinguished only by
+% colour, which reads against a filled column but leaves the empty half of a
+% rating invisible on white. The outline face is used for the empty stars here
+% so that a rating states its own denominator wherever it is set.
+\newcommand{\cvstarfull}{\textcolor{\cvstarfullcolor}{\faIcon{star}}}
+\newcommand{\cvstarempty}{\textcolor{\cvstaremptycolor}{\faIcon[regular]{star}}}
+
+\makeatletter
+% \cvstars{filled}{total}
+\newcommand{\cvstars}[2]{%
+  \cvstarsbreak
+  \@tempcnta=0\relax
+  \@whilenum\@tempcnta<#1\do{\cvstarfull\advance\@tempcnta by 1\relax}%
+  \@whilenum\@tempcnta<#2\do{\cvstarempty\advance\@tempcnta by 1\relax}}
+\makeatother
+
+%-------------------------------------------------------------------------------
+%	RATING BARS
+%-------------------------------------------------------------------------------
+% A proportion drawn as a filled bar, as upstream's `sidebarleft` rates a skill:
+% a track in the soft neutral with the accent filled across the fraction given.
+%
+% Reached from a document through the `bar` shortcode -- `{{< bar 80% >}}` --
+% for the same reason `stars` is a shortcode rather than a field on an entry: a
+% rating is a way of writing a value, so it belongs to the content. The two are
+% interchangeable, and every style defines both, so a document keeps its ratings
+% whichever it uses and whichever design it is rendered with.
+%
+% Declared here rather than in `sidebarleft` because a bar is not that design's
+% property, only its default. \vitaeskillbar there is a caller of this.
+\newcommand{\cvbarfullcolor}{sectcol}
+\newcommand{\cvbaremptycolor}{softcol}
+
+% How wide a bar is drawn. A macro rather than a length, so that it is expanded
+% where the bar is set rather than where it is configured: written in terms of
+% \linewidth it then follows the measure it lands in -- the full page in
+% `classic`, a table cell in a listing, a narrow column in a sidebar design --
+% without a design having to restate it for each.
+\newcommand{\cvbarwidth}{0.4\linewidth}
+\newcommand{\cvbarheight}{0.15}
+
+% As \cvstarsbreak: empty by default, so a bar sits on the line beside what it
+% rates, and set to a line break by a design too narrow for that.
+\newcommand{\cvbarbreak}{}
+
+% Resolved into a length before use, because the filled half is written as a
+% multiple of the width -- `0.8\cvbarlength` -- and a factor cannot multiply
+% another factor, which is what `0.8\cvbarwidth` would come to once \cvbarwidth
+% had expanded to `0.4\linewidth`.
+\newlength{\cvbarlength}
+
+% \cvbar{fraction} -- #1 between 0 and 1.
+%
+% `baseline` anchors the picture on the text baseline rather than centring the
+% box on it, so a bar written mid-sentence sits on the line rather than
+% straddling it and opening the leading above.
+\newcommand{\cvbar}[1]{%
+  \cvbarbreak
+  \setlength{\cvbarlength}{\cvbarwidth}%
+  \begin{tikzpicture}[baseline, rounded corners=2pt, very thin]
+    \fill [\cvbaremptycolor] (0,0) rectangle (\cvbarlength, \cvbarheight);
+    \fill [\cvbarfullcolor] (0,0) rectangle (#1\cvbarlength, \cvbarheight);
+  \end{tikzpicture}}
+
+% Gives an otherwise empty box the height of a line, so a \colorbox around it
+% is not set flush against the text it contains.
+\newcommand{\mystrut}{\rule[-.3\baselineskip]{0pt}{\baselineskip}}
+
+% Vertically centres a box on the current line, so an icon sits level with the
+% text beside it rather than on the baseline.
+\newcommand{\vcenteredhbox}[1]{\begingroup\setbox0=\hbox{#1}\parbox{\wd0}{\box0}\endgroup}
+
+%-------------------------------------------------------------------------------
+%	MEASURED COLUMNS
+%-------------------------------------------------------------------------------
+% An entry headline and a skills listing both set one or two fixed-width columns
+% beside a flexible one: a date column, an institution column, a category
+% column. How wide to make them is what this section answers.
+%
+% Upstream answers it with a constant -- 13.6cm for classic's date, `p{2.4cm}`
+% in modern's metasection, `p{2cm}` in rows', `p{0.18\linewidth}` in
+% two_column's -- and every one of those holds only because the content beside
+% it is hand-written to fit. Content out of a document is arbitrary, and a
+% constant fails on it in a way that is easy to miss: a p-column wraps at
+% spaces, so a value too wide to break does not overflow anywhere visible, it
+% runs on horizontally and overprints the column beside it.
+%
+% So the columns are measured. Each listing template runs \cvmeasure over its
+% entries before setting any of them, growing a length to fit the widest value;
+% every row is then set to that width, so the columns line up and are never
+% wider than their content needs.
+%
+% This is why there are no `when-width`, `with-width` or `skill-width` options.
+% A fixed length cannot be right for both a full page in `classic` and a narrow
+% sidebar column in `sidebar`, and once the width is taken from the content
+% there is nothing left for such an option to correct.
+%
+% What is left to choose is how far a measurement should reach, which is
+% `column-widths` in the front matter:
+%
+%   document  (default) One width per column for the whole document, taken from
+%             the widest value anywhere in it, so that entry titles share a left
+%             edge across every section. This is the look upstream got from its
+%             single fixed 2.3cm, and it needs a round trip: the widths are
+%             written to the .aux at the end of a run and read back at the start
+%             of the next. LaTeX is run twice as a matter of course, so this
+%             settles on its own; a deliberately single-pass render shows the
+%             first-pass widths and is warned about below.
+%
+%   listing   Each listing sizes its own columns. Tighter, and right on a single
+%             pass, at the cost of a section of short dates setting its titles
+%             further left than a section of long ones.
+$if(column-widths)$
+\def\cvcolscope{$column-widths$}
+$else$
+\def\cvcolscope{document}
+$endif$
+\makeatletter
+\def\cv@scopelisting{listing}
+\newif\ifcvcoldoc
+\ifx\cvcolscope\cv@scopelisting\cvcoldocfalse\else\cvcoldoctrue\fi
+\makeatother
+
+% The width each column is actually set at.
+\newlength{\cvwhenwidth}
+\newlength{\cvwithwidth}
+\newlength{\cvskillwidth}
+
+% The widest value seen so far. Grown globally, because in document scope it has
+% to survive the listing groups it is measured inside.
+\newlength{\cvwhenmax}
+\newlength{\cvwithmax}
+\newlength{\cvskillmax}
+
+% What the previous run measured, read back from the .aux.
+\newlength{\cvwhencarry}
+\newlength{\cvwithcarry}
+\newlength{\cvskillcarry}
+
+\newlength{\cvcolsep}
+\newlength{\cvcoltmp}
+\setlength{\cvcolsep}{0.8em}
+
+% Grows #1 to fit #2, if it does not already.
+\newcommand{\cvmeasure}[2]{%
+  \settowidth{\cvcoltmp}{#2}%
+  \ifdim\cvcoltmp>#1 \global#1=\cvcoltmp\fi}
+
+% Caps a settled column at #2, so that a single runaway value cannot crowd out
+% the flexible column beside it. A value past the cap wraps, which is the one
+% case where wrapping beats widening.
+%
+% Applied at the point of use rather than to the measurement itself, so that one
+% document-wide width in points still comes out sanely whether it is set across
+% a full page or down a narrow sidebar column.
+\newcommand{\cvcolcap}[2]{\ifdim#1>#2 \setlength{#1}{#2}\fi}
+
+% The listing environments. In listing scope the running maxima are reset per
+% listing, so each sizes itself; in document scope they are left to accumulate
+% across the whole document.
+\newenvironment{vitaeentries}{%
+  \ifcvcoldoc\else
+    \global\cvwhenmax=0pt\relax
+    \global\cvwithmax=0pt\relax
+  \fi
+}{\par}
+
+\newcommand{\cvmeasurewhen}[1]{\cvmeasure{\cvwhenmax}{#1}}
+\newcommand{\cvmeasurewith}[1]{\cvmeasure{\cvwithmax}{#1}}
+\newcommand{\cventriesready}{%
+  \setlength{\cvwhenwidth}{\ifcvcoldoc\cvwhencarry\else\cvwhenmax\fi}%
+  \setlength{\cvwithwidth}{\ifcvcoldoc\cvwithcarry\else\cvwithmax\fi}%
+  \setlength{\cvwhenwidth}{\dimexpr\cvwhenwidth+\cvcolsep\relax}%
+  \setlength{\cvwithwidth}{\dimexpr\cvwithwidth+\cvcolsep\relax}%
+  \cvcolcap{\cvwhenwidth}{\dimexpr\linewidth/4\relax}%
+  \cvcolcap{\cvwithwidth}{\dimexpr\linewidth*2/5\relax}}
+
+\newenvironment{vitaeskills}{%
+  \ifcvcoldoc\else\global\cvskillmax=0pt\relax\fi
+}{\par}
+
+\newcommand{\cvmeasureskill}[1]{\cvmeasure{\cvskillmax}{\textbf{#1}}}
+\newcommand{\cvskillsready}{%
+  \setlength{\cvskillwidth}{\ifcvcoldoc\cvskillcarry\else\cvskillmax\fi}%
+  \setlength{\cvskillwidth}{\dimexpr\cvskillwidth+\cvcolsep\relax}%
+  \cvcolcap{\cvskillwidth}{\dimexpr\linewidth*3/5\relax}}
+
+%-------------------------------------------------------------------------------
+% The .aux round trip that document scope runs on.
+%
+% \cvcolcarried is what the previous run left behind; it is called as the .aux is
+% read at \begin{document}, before any listing is set. At the end of this run the
+% maxima just measured are written back, and compared with what was carried in --
+% a difference means the widths on the page are the old ones, and a rerun will
+% settle them, so it is reported the way LaTeX reports any other rerun.
+% The assignments must be global. LaTeX reads the .aux inside a group -- the
+% \begingroup ... \@input{\jobname.aux} ... \endgroup in \document -- so a local
+% \setlength here is undone the moment the file ends, and every width arrives
+% back at zero. It is the same reason \newlabel and friends are global.
+\newcommand{\cvcolcarried}[3]{%
+  \global\cvwhencarry=#1\relax
+  \global\cvwithcarry=#2\relax
+  \global\cvskillcarry=#3\relax}
+
+\makeatletter
+\AtEndDocument{%
+  \ifcvcoldoc
+    \immediate\write\@auxout{%
+      \string\cvcolcarried{\the\cvwhenmax}{\the\cvwithmax}{\the\cvskillmax}}%
+    \ifdim\cvwhenmax=\cvwhencarry
+      \ifdim\cvwithmax=\cvwithcarry
+        \ifdim\cvskillmax=\cvskillcarry\else\cv@colrerun\fi
+      \else\cv@colrerun\fi
+    \else\cv@colrerun\fi
+  \fi}
+\newcommand{\cv@colrerun}{%
+  \@latex@warning@no@line{Entry column widths have changed. Rerun to get them
+    right, or set `column-widths: listing' to size each listing on its own}}
+\makeatother
+
+\newcommand{\cvskillrow}[2]{%
+  \noindent
+  \begin{tabular*}{\linewidth}{@{}p{\cvskillwidth}@{}p{\dimexpr\linewidth-\cvskillwidth\relax}@{}}
+    \textbf{#1} & #2
+  \end{tabular*}\par\vspace{2pt}}
+
+%-------------------------------------------------------------------------------
+%	TITLE RULE
+%-------------------------------------------------------------------------------
+% The accent bar set between the name and the document name in the title.
+%
+% Upstream writes the gaps either side of it as ordinary interword spaces, which
+% fails in two different ways. Where the bar opens a source line the gap before
+% it vanishes outright, because TeX discards leading whitespace; and where the
+% title's \HUGE is a group rather than a switch, the spaces fall outside it and
+% are set at body size, a third of the width they should be. Both faults were
+% present in the shipped designs.
+%
+% The gaps are given in em so they follow the size the title is set at. Call
+% this with that size in force.
+\newcommand{\cvtitlerule}{%
+  \hspace{0.45em}\textcolor{sectcol}{\rule[-1mm]{1mm}{0.9cm}}\hspace{0.3em}}
+
+%-------------------------------------------------------------------------------
+%	CONTACT DETAILS
+%-------------------------------------------------------------------------------
+% The contact fields from the document front matter, emitted as a sequence of
+% \cvcontact{icon}{text} calls. Every style renders the same set; what differs
+% is only how they are strung together, so each style redefines \cvcontact or
+% \cvcontactsep rather than repeating the list of fields.
+%
+% \cvcontactsep is written *between* items, never after, so a style is free to
+% make it a line break.
+\newif\ifcvfirstcontact
+\cvfirstcontacttrue
+\newcommand{\cvcontactsep}{\hspace{12pt}}
+\newcommand{\cvcontacticon}[1]{\faIcon{#1}~}
+\newcommand{\cvcontact}[2]{%
+  \ifcvfirstcontact\cvfirstcontactfalse\else\cvcontactsep\fi
+  \mbox{\cvcontacticon{#1}#2}}
+
+% Resets the "first item" flag, so a style may emit \cvcontacts more than once
+% (the sidebar styles split it between the header and the sidebar).
+\newcommand{\cvcontactsreset}{\cvfirstcontacttrue}
+
+\newcommand{\cvcontacts}{%
+$if(address)$\cvcontact{map-marker-alt}{$address$}$endif$%
+$if(phone)$\cvcontact{phone-alt}{$phone$}$endif$%
+$if(email)$\cvcontact{envelope}{\href{mailto:$email$}{$email$}}$endif$%
+$if(www)$\cvcontact{home}{\href{https://$www$}{$www$}}$endif$%
+$if(github)$\cvcontact{github}{\href{https://github.com/$github$}{$github$}}$endif$%
+$if(gitlab)$\cvcontact{gitlab}{\href{https://gitlab.com/$gitlab$}{$gitlab$}}$endif$%
+$if(linkedin)$\cvcontact{linkedin}{\href{https://www.linkedin.com/in/$linkedin$}{$linkedin$}}$endif$%
+$if(twitter)$\cvcontact{twitter}{\href{https://twitter.com/$twitter$}{@$twitter$}}$endif$%
+$if(mastodon)$\cvcontact{mastodon}{\href{https://$mastodon.instance$/@$mastodon.name$}{@$mastodon.name$}}$endif$%
+$if(scholar)$\cvcontact{google}{\href{https://scholar.google.com/citations?user=$scholar$}{Google Scholar}}$endif$%
+$if(orcid)$\cvcontact{orcid}{\href{https://orcid.org/$orcid$}{$orcid$}}$endif$%
+$if(stackoverflow)$\cvcontact{stack-overflow}{\href{https://stackoverflow.com/users/$stackoverflow$}{$stackoverflow$}}$endif$%
+$if(dateofbirth)$\cvcontact{birthday-cake}{$dateofbirth$}$endif$%
+$for(extrainfo)$\cvcontact{$extrainfo.icon$}{$extrainfo.text$}$endfor$%
+}
+
+%-------------------------------------------------------------------------------
+%	PANDOC SUPPORT
+%-------------------------------------------------------------------------------
+% Upstream leaves links unadorned rather than boxed or coloured, which is what
+% `hidelinks` gives. It is passed to the package rather than loaded with it,
+% because the partials below load hyperref themselves (with `unicode`), and
+% loading it twice with different options is an option clash. The hypersetup
+% partial runs afterwards, so `colorlinks: true` still wins.
+\PassOptionsToPackage{hidelinks}{hyperref}
+
+% common.latex is required in every custom Quarto LaTeX template, and calls
+% pandoc.tex, which in turn brings in syntax highlighting, tables.tex,
+% graphics.tex, citations.tex, babel-lang.tex, tightlist.tex, biblio-config.tex
+% and header-includes. Do not hand-copy any of those: they are Pandoc's to
+% maintain, and a stale local copy silently drifts out of step with the reader.
+$common.latex()$
+$after-header-includes.latex()$
+$hypersetup.latex()$
+
+% Honours mainfont/sansfont/monofont and the fontfamily options, so the fonts
+% are changed the same way as in any other Quarto pdf. fonts.latex is NOT
+% called: it would load lmodern over the top of the stack chosen above.
+$font-settings.latex()$
+
+%-------------------------------------------------------------------------------
+%	ENTRY MACROS
+%-------------------------------------------------------------------------------
+% The listings in `entries/` are shared by every style, so they are written
+% against the four commands below rather than against any one style's own
+% macros. Each `latexcv-<style>.tex` defines them in its own visual language:
+%
+%   \cvsection{title}                        a level-1 heading
+%   \cvsubsection{title}                     a level-2 heading
+%   \vitaeentry{when}{what}{with}{where}{why}   one `detailed` entry
+%   \vitaebrief{when}{what}{with}{where}     one `brief` entry
+%   \vitaeskill{what}{with}                  one `skills` entry
+%   vitaewhy (environment)                   the bullets under a detailed entry
+%
+% Upstream's own \cvevent is deliberately not carried over. Its argument list
+% differs between styles (four arguments in `classic`, five in `modern`, seven
+% in `sidebarleft`), and in three of them the elaboration is two fixed
+% arguments rather than a list -- so an entry may have exactly two bullets and
+% no more. The commands above take the same fields in every style, and take
+% the elaboration as a list of any length.
