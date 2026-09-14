@@ -94,15 +94,36 @@ the `stars` and `bar` shortcodes — is installed with them as an eighth
 extension, `latexcv-common`, which each design draws from. It is not a format
 and is never named in a `format:` line.
 
-| `format:` | Design |
-|-----------|--------|
-| `latexcv-classic-pdf` | A centred title, centred headings, and full-width entries under a hairline. The plainest of the set. |
-| `latexcv-modern-pdf` | Contacts in a running head over a full-bleed dark title bar, a filled accent bar per section, and the date in its own left-hand column. |
-| `latexcv-minimalistic-pdf` | No bars and no rules. Large uppercase headings, entries separated by space alone. |
-| `latexcv-rows-pdf` | The page as a stack of full-width bands, one per section, shaded alternately, each named by a large heading turned on its side down its right margin. |
-| `latexcv-sidebar-pdf` | A tinted column of contacts and skills down the right, beside the main content. |
-| `latexcv-sidebarleft-pdf` | Two columns on white divided by a thick rule, a filled title panel over the wide one, dates on filled badges, and skills drawn as rating bars. |
-| `latexcv-twocolumn-pdf` | The body in two balanced columns, the name a filled bar opening the left one, contacts in a running head and a filled bar across the foot. |
+<table>
+<tr>
+<td width="160"><img src="preview/classic.png" alt="latexcv-classic-pdf"></td>
+<td><code>latexcv-classic-pdf</code><br>A centred title, centred headings, and full-width entries under a hairline. The plainest of the set.</td>
+</tr>
+<tr>
+<td><img src="preview/modern.png" alt="latexcv-modern-pdf"></td>
+<td><code>latexcv-modern-pdf</code><br>Contacts in a running head over a full-bleed dark title bar, a filled accent bar per section, and the date in its own left-hand column.</td>
+</tr>
+<tr>
+<td><img src="preview/minimalistic.png" alt="latexcv-minimalistic-pdf"></td>
+<td><code>latexcv-minimalistic-pdf</code><br>No bars and no rules. Large uppercase headings, entries separated by space alone.</td>
+</tr>
+<tr>
+<td><img src="preview/rows.png" alt="latexcv-rows-pdf"></td>
+<td><code>latexcv-rows-pdf</code><br>The page as a stack of full-width bands, one per section, shaded alternately, each named by a large heading turned on its side down its right margin.</td>
+</tr>
+<tr>
+<td><img src="preview/sidebar.png" alt="latexcv-sidebar-pdf"></td>
+<td><code>latexcv-sidebar-pdf</code><br>A tinted column of contacts and skills down the right, beside the main content.</td>
+</tr>
+<tr>
+<td><img src="preview/sidebarleft.png" alt="latexcv-sidebarleft-pdf"></td>
+<td><code>latexcv-sidebarleft-pdf</code><br>Two columns on white divided by a thick rule, a filled title panel over the wide one, dates on filled badges, and skills drawn as rating bars.</td>
+</tr>
+<tr>
+<td><img src="preview/twocolumn.png" alt="latexcv-twocolumn-pdf"></td>
+<td><code>latexcv-twocolumn-pdf</code><br>The body in two balanced columns, the name a filled bar opening the left one, contacts in a running head and a filled bar across the foot.</td>
+</tr>
+</table>
 
 ### The sidebar column
 
