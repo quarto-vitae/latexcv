@@ -32,32 +32,40 @@ and is never named in a `format:` line.
 
 <table>
 <tr>
-<td width="320"><img src="preview/classic.png" alt="latexcv-classic-pdf"></td>
-<td><code>format: latexcv-classic-pdf</code><br>A centred title, centred headings, and full-width entries under a hairline. The plainest of the set.</td>
+<td align="center" width="50%">
+<code>format: latexcv-classic-pdf</code><br>
+<img src="preview/classic.png" alt="A centred title, centred headings, and full-width entries under a hairline. The plainest of the set." width="100%">
+</td>
+<td align="center" width="50%">
+<code>format: latexcv-modern-pdf</code><br>
+<img src="preview/modern.png" alt="Contacts in a running head over a full-bleed dark title bar, a filled accent bar per section, and the date in its own left-hand column." width="100%">
+</td>
 </tr>
 <tr>
-<td><img src="preview/modern.png" alt="latexcv-modern-pdf"></td>
-<td><code>format: latexcv-modern-pdf</code><br>Contacts in a running head over a full-bleed dark title bar, a filled accent bar per section, and the date in its own left-hand column.</td>
+<td align="center">
+<code>format: latexcv-minimalistic-pdf</code><br>
+<img src="preview/minimalistic.png" alt="No bars and no rules. Large uppercase headings, entries separated by space alone." width="100%">
+</td>
+<td align="center">
+<code>format: latexcv-rows-pdf</code><br>
+<img src="preview/rows.png" alt="The page as a stack of full-width bands, one per section, shaded alternately, each named by a large heading turned on its side down its right margin." width="100%">
+</td>
 </tr>
 <tr>
-<td><img src="preview/minimalistic.png" alt="latexcv-minimalistic-pdf"></td>
-<td><code>format: latexcv-minimalistic-pdf</code><br>No bars and no rules. Large uppercase headings, entries separated by space alone.</td>
+<td align="center">
+<code>format: latexcv-sidebar-pdf</code><br>
+<img src="preview/sidebar.png" alt="A tinted column of contacts and skills down the right, beside the main content." width="100%">
+</td>
+<td align="center">
+<code>format: latexcv-sidebarleft-pdf</code><br>
+<img src="preview/sidebarleft.png" alt="Two columns on white divided by a thick rule, a filled title panel over the wide one, dates on filled badges, and skills drawn as rating bars." width="100%">
+</td>
 </tr>
 <tr>
-<td><img src="preview/rows.png" alt="latexcv-rows-pdf"></td>
-<td><code>format: latexcv-rows-pdf</code><br>The page as a stack of full-width bands, one per section, shaded alternately, each named by a large heading turned on its side down its right margin.</td>
-</tr>
-<tr>
-<td><img src="preview/sidebar.png" alt="latexcv-sidebar-pdf"></td>
-<td><code>format: latexcv-sidebar-pdf</code><br>A tinted column of contacts and skills down the right, beside the main content.</td>
-</tr>
-<tr>
-<td><img src="preview/sidebarleft.png" alt="latexcv-sidebarleft-pdf"></td>
-<td><code>format: latexcv-sidebarleft-pdf</code><br>Two columns on white divided by a thick rule, a filled title panel over the wide one, dates on filled badges, and skills drawn as rating bars.</td>
-</tr>
-<tr>
-<td><img src="preview/twocolumn.png" alt="latexcv-twocolumn-pdf"></td>
-<td><code>format: latexcv-twocolumn-pdf</code><br>The body in two balanced columns, the name a filled bar opening the left one, contacts in a running head and a filled bar across the foot.</td>
+<td align="center">
+<code>format: latexcv-twocolumn-pdf</code><br>
+<img src="preview/twocolumn.png" alt="The body in two balanced columns, the name a filled bar opening the left one, contacts in a running head and a filled bar across the foot." width="100%">
+</td>
 </tr>
 </table>
 
