@@ -32,7 +32,7 @@ and is never named in a `format:` line.
 
 <table>
 <tr>
-<td width="160"><img src="preview/classic.png" alt="latexcv-classic-pdf"></td>
+<td width="320"><img src="preview/classic.png" alt="latexcv-classic-pdf"></td>
 <td><code>format: latexcv-classic-pdf</code><br>A centred title, centred headings, and full-width entries under a hairline. The plainest of the set.</td>
 </tr>
 <tr>
