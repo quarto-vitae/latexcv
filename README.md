@@ -178,9 +178,10 @@ Set the format and describe yourself in the YAML header:
 name: Marie
 surname: Curie
 position: Physicist and Chemist
-email: "marie.curie@sorbonne.fr"
-www: mariecurie.fr
-orcid: 0000-0002-1825-0097
+social:
+  - email: marie.curie@sorbonne.fr
+  - website: mariecurie.fr
+  - orcid: 0000-0002-1825-0097
 format: latexcv-classic-pdf
 ---
 ```
@@ -274,16 +275,51 @@ Set these in the YAML header. All are optional except `name`.
 | `name`, `surname` | The name shown in the title |
 | `position` | A role or subtitle under the name |
 | `docname` | Set beside the name, defaulting to `Resume`. Ignored by `twocolumn`, which follows upstream in setting the accent rule between the given and family names instead |
-| `address`, `phone`, `email`, `www` | Contact details |
-| `github`, `gitlab`, `linkedin`, `twitter` | Code and social profiles |
-| `mastodon` | Given as `{instance: fosstodon.org, name: user}` |
-| `scholar`, `orcid`, `stackoverflow` | Research and Q&A profiles |
-| `dateofbirth` | Shown with a cake icon, as upstream does |
-| `extrainfo` | A list of `{icon: ..., text: ...}` pairs, for anything not listed above. `icon` is a [Font Awesome 5](https://fontawesome.com/v5/search) name. |
+| `social` | Address and contact details, [below](#contact-details) |
+| `dateofbirth` | Shown with a cake icon after the contact details, as upstream does |
 | `sidebar` | Sections for the sidebar designs, as above |
 | `profilepic` | A photograph. Every design places it: centred above the title in `classic` and `minimalistic`, top-right in `modern` and `twocolumn`, at the head of the column in the sidebar designs, and in a band of its own above the first section in `rows`. `profilepic-width` overrides the size |
 | `qrcode` | An image set at the foot of the sidebar column |
-| `footer` | A trailing line, set in the accent colour. `twocolumn` sets it instead in a filled bar across the foot of every page, falling back to `www` and `github` when it is not given, as upstream does |
+| `footer` | A trailing line, set in the accent colour. `twocolumn` sets it instead in a filled bar across the foot of every page, falling back to the `website` and `github` entries of `social` when it is not given, as upstream does |
+
+### Contact details
+
+The address and contact details come from `social`, a list shown in the order
+you write it. Each design sets them in its own place: under the title in
+`classic` and `minimalistic`, in the running head in `modern` and `twocolumn`,
+in the title band in `rows`, and in the column in the sidebar designs. Each
+item is `service: handle`, written the way that service writes it, and a full
+profile URL works in place of any handle:
+
+```yaml
+social:
+  - address: "Paris, France"
+  - phone: "+33 1 23 45 67 89"
+  - email: marie.curie@example.org
+  - website: example.org
+  - orcid: 0000-0002-1825-0097
+  - github: mcurie
+  - mastodon: "@mcurie@fosstodon.org"
+  - stackoverflow: 123456/marie-curie
+  - linkedin: {handle: mcurie, label: "Marie Curie"}
+  - custom:
+      - icon: flask
+        text: "[Curie Laboratory](https://example.org/lab)"
+      - text: "Available Mon–Thu"
+```
+
+The services are `address`, `phone`, `email`, `website`, `whatsapp`,
+`telegram`, `skype`, `orcid`, `googlescholar`, `researchgate`, `github`,
+`gitlab`, `bitbucket`, `stackoverflow`, `kaggle`, `hackerrank`, `linkedin`,
+`mastodon`, `bluesky`, `x`, `twitter`, `xing`, `reddit` and `medium`. Giving
+a map instead of a handle, as for `linkedin` above, overrides any of `handle`,
+`url`, `label`, `icon` or `title`. Anything else goes under `custom`, as
+markdown `text` with an optional `icon` and `url`. Icons are named as in
+[Font Awesome 6](https://fontawesome.com/search?ic=free).
+
+`social` is shared by every vitae template, through
+[curriculum](https://github.com/quarto-vitae/curriculum), so the same list
+works unchanged if you switch designs, or to another vitae template.
 
 ### Appearance
 
