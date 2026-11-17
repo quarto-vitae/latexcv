@@ -164,19 +164,34 @@ $endif$
       [\ht\cvfootbox][\dp\cvfootbox]{\usebox\cvfootbox}}}
 
 % `footer` fills the bar when it is given. Failing that it carries the web and
-% code addresses, which is what upstream puts there -- so the bar is present on
-% a document that never asked for one, as it is in the design.
+% code addresses from `social`, which is what upstream puts there -- so the bar
+% is present on a document that never asked for one, as it is in the design.
+% They stay on the contact line in the head as well.
+%
+% The website comes first and GitHub second, whatever order `social` lists them
+% in, as upstream sets them. Each is collected into \cvfootitems with the
+% separator before all but the first, and the bar is only set when something
+% was collected, so a document with neither has no bar.
+\def\cvfootitems{}
+\makeatletter
+\newcommand{\cvfootitem}[1]{%
+  \ifx\cvfootitems\empty\else\g@addto@macro\cvfootitems{\cvcontactsep}\fi
+  \g@addto@macro\cvfootitems{#1}}
+\makeatother
 $if(footer)$
 \cfoot{\cvfooterbar{$footer$}}
 $else$
-$if(www)$
-\cfoot{\cvfooterbar{\href{https://$www$}{$www$}%
-  $if(github)$\cvcontactsep\href{https://github.com/$github$}{github.com/$github$}$endif$}}
-$else$
-$if(github)$
-\cfoot{\cvfooterbar{\href{https://github.com/$github$}{github.com/$github$}}}
+$for(social)$
+$if(social.is.website)$
+\cvfootitem{\href{$social.url$}{$social.label$}}
 $endif$
+$endfor$
+$for(social)$
+$if(social.is.github)$
+\cvfootitem{\href{$social.url$}{$if(social.given.label)$$social.label$$else$github.com/$social.handle$$endif$}}
 $endif$
+$endfor$
+\ifx\cvfootitems\empty\else\cfoot{\cvfooterbar{\cvfootitems}}\fi
 $endif$
 
 \begin{document}
