@@ -122,9 +122,10 @@ $endif$
 \usetikzlibrary{shapes, backgrounds, mindmap, trees}
 
 % Icons for the contact details. Upstream's older styles load `fontawesome`
-% (v4) and the newer ones `fontawesome5`; v5 is used throughout here so that
-% one icon name means the same thing in every style.
-\usepackage{fontawesome5}
+% (v4) and the newer ones `fontawesome5`; v6 is used throughout here so that
+% one icon name means the same thing in every style, and because v6 names are
+% what the `social` front matter hands over (see CONTACT DETAILS).
+\usepackage{fontawesome6}
 
 %-------------------------------------------------------------------------------
 %	COLOURS
@@ -509,40 +510,43 @@ $endif$
 %-------------------------------------------------------------------------------
 %	CONTACT DETAILS
 %-------------------------------------------------------------------------------
-% The contact fields from the document front matter, emitted as a sequence of
+% The contact details from the `social` front matter, emitted as a sequence of
 % \cvcontact{icon}{text} calls. Every style renders the same set; what differs
 % is only how they are strung together, so each style redefines \cvcontact or
-% \cvcontactsep rather than repeating the list of fields.
+% \cvcontactsep rather than repeating the loop.
 %
 % \cvcontactsep is written *between* items, never after, so a style is free to
-% make it a line break.
+% make it a line break. The macro keeps track of the first item itself, so a
+% style that leaves an item out never strands a separator.
 \newif\ifcvfirstcontact
 \cvfirstcontacttrue
 \newcommand{\cvcontactsep}{\hspace{12pt}}
-\newcommand{\cvcontacticon}[1]{\faIcon{#1}~}
+% A custom entry may have no icon, and is then set as text alone.
+\newcommand{\cvifblank}[3]{\if\relax\detokenize{#1}\relax#2\else#3\fi}
+\newcommand{\cvcontacticon}[1]{\cvifblank{#1}{}{\faIcon{#1}~}}
 \newcommand{\cvcontact}[2]{%
   \ifcvfirstcontact\cvfirstcontactfalse\else\cvcontactsep\fi
   \mbox{\cvcontacticon{#1}#2}}
 
-% Resets the "first item" flag, so a style may emit \cvcontacts more than once
-% (the sidebar styles split it between the header and the sidebar).
+% Resets the "first item" flag, so a style may emit \cvcontacts more than once.
 \newcommand{\cvcontactsreset}{\cvfirstcontacttrue}
 
+% `social` has already been normalised by the embedded curriculum filter: every
+% item has the same fields (service, is, icon, url, label, handle, given), in
+% the order the author wrote them, and `url` is escaped for \href. Custom
+% entries carry a label (and optionally an icon and url) only.
+%
+% Icons are curriculum's Font Awesome 6 defaults, except where these designs
+% have always drawn a different one: the map marker (the v6 name of upstream's
+% v5 icon), a house for a website, and the Google mark for Google Scholar. Labels likewise, except that Twitter and Mastodon
+% handles are set as `@user`, as upstream sets them. An icon or label the
+% author chose (`given`) always wins over the design's own.
 \newcommand{\cvcontacts}{%
-$if(address)$\cvcontact{map-marker-alt}{$address$}$endif$%
-$if(phone)$\cvcontact{phone-alt}{$phone$}$endif$%
-$if(email)$\cvcontact{envelope}{\href{mailto:$email$}{$email$}}$endif$%
-$if(www)$\cvcontact{home}{\href{https://$www$}{$www$}}$endif$%
-$if(github)$\cvcontact{github}{\href{https://github.com/$github$}{$github$}}$endif$%
-$if(gitlab)$\cvcontact{gitlab}{\href{https://gitlab.com/$gitlab$}{$gitlab$}}$endif$%
-$if(linkedin)$\cvcontact{linkedin}{\href{https://www.linkedin.com/in/$linkedin$}{$linkedin$}}$endif$%
-$if(twitter)$\cvcontact{twitter}{\href{https://twitter.com/$twitter$}{@$twitter$}}$endif$%
-$if(mastodon)$\cvcontact{mastodon}{\href{https://$mastodon.instance$/@$mastodon.name$}{@$mastodon.name$}}$endif$%
-$if(scholar)$\cvcontact{google}{\href{https://scholar.google.com/citations?user=$scholar$}{Google Scholar}}$endif$%
-$if(orcid)$\cvcontact{orcid}{\href{https://orcid.org/$orcid$}{$orcid$}}$endif$%
-$if(stackoverflow)$\cvcontact{stack-overflow}{\href{https://stackoverflow.com/users/$stackoverflow$}{$stackoverflow$}}$endif$%
-$if(dateofbirth)$\cvcontact{birthday-cake}{$dateofbirth$}$endif$%
-$for(extrainfo)$\cvcontact{$extrainfo.icon$}{$extrainfo.text$}$endfor$%
+$for(social)$
+\cvcontact{$if(social.given.icon)$$social.icon$$elseif(social.is.address)$location-dot$elseif(social.is.website)$house$elseif(social.is.googlescholar)$google$else$$social.icon$$endif$}{$if(social.url)$\href{$social.url$}{$endif$$if(social.given.label)$$social.label$$elseif(social.is.twitter)$@$social.handle$$elseif(social.is.mastodon)$$if(social.user)$@$social.user$$else$$social.label$$endif$$else$$social.label$$endif$$if(social.url)$}$endif$}%
+$endfor$
+$-- Not a means of contact, so not in `social`, but set on the same line.
+$if(dateofbirth)$\cvcontact{cake-candles}{$dateofbirth$}$endif$%
 }
 
 %-------------------------------------------------------------------------------

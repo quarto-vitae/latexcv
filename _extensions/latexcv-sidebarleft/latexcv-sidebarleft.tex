@@ -217,6 +217,8 @@ $endif$
 % column -- an address, usually -- aligned under itself on its second line
 % rather than back under the icon.
 %
+% A custom entry without an icon is set flush left, as a plain line of text.
+%
 % \begingroup keeps the redefinitions local, so a document emitting contacts
 % twice does not get this one-per-line form the second time.
 \newcommand{\cvsidebarcontacts}{%
@@ -225,8 +227,9 @@ $endif$
   \renewcommand{\cvcontactsep}{\par\vspace{6pt}}%
   \renewcommand{\cvcontact}[2]{%
     \ifcvfirstcontact\cvfirstcontactfalse\else\cvcontactsep\fi
-    \noindent\hangindent=1.5em\hangafter=1
-    \textcolor{sectcol}{\faIcon{##1}}\hspace{0.5em}##2}%
+    \noindent
+    \cvifblank{##1}{}{\hangindent=1.5em\hangafter=1
+      \textcolor{sectcol}{\faIcon{##1}}\hspace{0.5em}}##2}%
   \cvcontacts\par
   \endgroup}
 
